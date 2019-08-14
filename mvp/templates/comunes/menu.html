@@ -1,0 +1,125 @@
+{% load static %}
+
+<!-- Dropdown Structure -->
+<ul id="catProd" class="dropdown-content">
+  <li><a href="{% url 'catalogoProductos' 'Verduras' %}">Verduras</a></li>
+  <li class="divider"></li>
+  <li><a href="{% url 'catalogoProductos' 'Frutas' %}">Frutas</a></li>
+  <li class="divider"></li>
+  <li><a href="{% url 'catalogoProductos' 'Panadería y bollería' %}">Panadería y bollería</a></li>
+  <li class="divider"></li>
+  <li><a href="{% url 'catalogoProductos' 'Legumbres' %}">Legumbres</a></li>
+  <li class="divider"></li>
+  <li><a href="{% url 'catalogoProductos' 'Pastas y arroces' %}">Pastas y arroces</a></li>
+  <li class="divider"></li>
+  <li><a href="{% url 'catalogoProductos' 'Harinas, cereales y semillas' %}">Harinas, cereales y semillas</a></li>
+  <li class="divider"></li>
+  <li><a href="{% url 'catalogoProductos' 'Frutos secos y deshidratados' %}">Frutos secos y deshidratados</a></li>
+  <li class="divider"></li>
+  <li><a href="{% url 'catalogoProductos' 'Lácteos, yogures y huevos' %}">Lácteos, yogures y huevos</a></li>
+  <li class="divider"></li>
+  <li><a href="{% url 'catalogoProductos' 'Aceites, condimentos y sal' %}">Aceites, condimentos y sal</a></li>
+  <li class="divider"></li>
+  <li><a href="{% url 'catalogoProductos' 'Azúcar y miel' %}">Azúcar y miel</a></li>
+  <li class="divider"></li>
+  <li><a href="{% url 'catalogoProductos' 'Conservas y mermeladas' %}">Conservas y mermeladas</a></li>
+  <li class="divider"></li>
+  <li><a href="{% url 'catalogoProductos' 'Zumos, cafés y bebidas' %}">Zumos, cafés y bebidas</a></li>
+  <li class="divider"></li>
+  <li><a href="{% url 'catalogoProductos' 'Infusiones, tés y aromáticas' %}">Infusiones, tés y aromáticas</a></li>
+  <li class="divider"></li>
+  <li><a href="{% url 'catalogoProductos' 'Vinos, cervezas y licores' %}">Vinos, cervezas y licores</a></li>
+  <li class="divider"></li>
+  <li><a href="{% url 'catalogoProductos' 'Chocolate, aperitivos y dulces' %}">Chocolate, aperitivos y dulces</a></li>
+  <li class="divider"></li>
+  <li><a href="{% url 'catalogoProductos' 'Higiene personal' %}">Higiene personal</a></li>
+  <li class="divider"></li>
+  <li><a href="{% url 'catalogoProductos' 'Productos de limpieza' %}">Productos de limpieza</a></li>
+  <li class="divider"></li>
+  <li><a href="{% url 'catalogoProductos' 'Alimentación infantil' %}">Alimentación infantil</a></li>
+  <li class="divider"></li>
+  <li><a href="{% url 'catalogoProductos' 'Ropa y textil' %}">Ropa y textil</a></li>
+</ul>
+
+<nav>
+    <div class="nav-wrapper">
+        <ul class="left hide-on-med-and-down">
+            <!-- Dropdown Trigger -->
+            <li><a class="dropdown-trigger" data-target="catProd">Catálogo de productos<i class="material-icons left">arrow_drop_down</i></a></li>
+            <li><a href='/catalogoProductores'>Catálogo de productores</a></li>
+            <li><a href={% url 'blog' %}>Blog</a></li>
+
+            {% if not user.is_authenticated %}
+                <li><a href='/login'>Iniciar sesión</a></li>
+            {% endif %}
+
+            {% if user.is_authenticated %}
+                <li><a href="/perfil">Perfil</a></li>
+                <li><a class="modal-trigger" href="#AdvCierreSesion">Cerrar sesión</a></li>
+            {% endif %}
+        </ul>
+
+        <ul class="right hide-on-med-and-down">
+            <nav>
+                <div class="nav-wrapper">
+                    <div class="input-field" style="width: 230pt;">
+                      <form action="{% url 'resultadoBusqueda' %}" method="get">
+                          <input type="text" name="q" placeholder="  Buscar producto" style="width: 230pt;">
+                      </form>
+                    </div>
+                </div>
+            </nav>
+        </ul>
+
+        {% if user.consumidor %}
+        <ul class="right hide-on-med-and-down">
+            <li style="text-align: right;">
+                {% if request.session.total_items > 1 %}
+                    <a class="btn waves-effect waves-light" href= "{% url 'carroCompra' %}">
+                    <i class="material-icons left">shopping_cart</i>
+                        <span class="new badge brown darken-2" data-badge-caption="productos">{{ request.session.total_items }}</span></a>
+                {% elif request.session.total_items == 1 %}
+                    <a class="btn waves-effect waves-light" href= "{% url 'carroCompra' %}">
+                    <i class="material-icons left">shopping_cart</i>
+                        <span class="new badge brown darken-2" data-badge-caption="producto">{{ request.session.total_items }}</span></a>
+                {% else %}
+                    <a class="btn waves-effect waves-light" href= "{% url 'carroCompra' %}">
+                    <i class="material-icons left">shopping_cart</i>
+                        Carrito<span class="new badge brown darken-2" data-badge-caption="vacío"></span></a>
+                {% endif %}
+            </li>
+        </ul>
+        {% endif %}
+
+    </div>
+</nav>
+
+<script type="text/javascript" src={% static "js/jquery-3.4.1.js" %}></script>
+
+<script>
+	$(document).ready(function(){
+      $('.dropdown-trigger').dropdown({
+        coverTrigger: false, //Si "true" el desplegable se abrirá encima del boton
+        hover : true, //Si "true", el desplegable se abrirá al pasar el cursor
+        constrainWidth : false, //Si "true", el desplegable es del mismo tamaño que el boton
+      });
+  });
+</script>
+
+<!-- Modal Structure -->
+<div id="AdvCierreSesion" class="modal">
+  <div class="modal-content">
+    <h4>ADVERTENCIA</h4>
+      <p>¿Está seguro que desea cerrar su sesión?</p>
+  </div>
+  <div class="modal-footer">
+    <a href="/cerrarSesion" class="modal-close waves-effect waves-green btn-flat"><strong>Sí, cerrar sesión</strong></a>
+    <a href="#!" class="modal-close waves-effect waves-green btn-flat"><strong>Cancelar</strong></a>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function(){
+    $('.modal').modal();
+  });
+</script>

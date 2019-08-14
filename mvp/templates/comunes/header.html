@@ -1,0 +1,46 @@
+{% load static %}
+
+<div class="slider">
+  <ul class="slides">
+    <li>
+      <a href="/index"><img src={% static "img/tomateEco.jpg" %} href="/index"></a>
+      <div class="caption center-align">
+        <h3>Productos ecológicos</h3>
+          <h5 class="white-text text-lighten-3">Sin intermediarios</h5>
+      </div>
+    </li>
+    <li>
+      <a href="/index"><img src={% static "img/pimientoEco.jpg" %}></a>
+      <div class="caption left-align">
+        <h3>Productos de nuestra localidad</h3>
+          <h5 class="white-text text-lighten-3">Ayuda al crecimiento de su economía</h5>
+      </div>
+    </li>
+    <li>
+      <a href="/index"><img src={% static "img/vaca.jpg" %} href="/index"></a>
+      <div class="caption right-align">
+        <h3>Asegurando el bienestar animal</h3>
+          <h5 class="white-text text-lighten-3">Y respetando el ciclo natural</h5>
+      </div>
+    </li>
+    <li>
+      <a href="/index"><img src={% static "img/huertaEco.jpg" %} href="/index"></a>
+      <div class="caption center-align">
+        <h3>Cosecha diaria de nuestras huertas</h3>
+          <h5 class="white-text text-lighten-3">Para acercarlas a tu mesa</h5>
+      </div>
+    </li>
+  </ul>
+</div>
+
+<script type="text/javascript" src={% static "js/jquery-3.4.1.js" %}></script>
+
+<script>
+	$(document).ready(function(){
+      $('.slider').slider({
+        indicators: false, //default - indicators : true
+        height : 350, //default - height : 400
+        interval: 6000 //default - interval: 6000
+      });
+  });
+</script>

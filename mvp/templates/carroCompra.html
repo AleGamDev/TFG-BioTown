@@ -1,0 +1,98 @@
+{% extends "comunes/base.html" %}
+
+{% block title %}Carrito{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+    <!--Título-->
+    <div class="col s12">
+        <h3 class="center-align"><strong>Carrito de compra</strong></h3>
+    </div>
+    <br>
+
+    <!--Tabla con los productos del carro-->
+    <div class="container center-align" style="justify-content: center;">
+        <div class="col s12">
+            {% if carrito %}
+            <table class="striped centered">
+                <thead>
+                    <tr>
+                        <th>Foto</th>
+                        <th>Nombre</th>
+                        <th>Precio unitario</th>
+                        <th>Cantidad</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in carrito.itemcarrito_set.all %}
+                    <tr>
+                        <td><img class="materialboxed center-block" src="{{ item.producto.foto.url }}" style="height:80px;"></td>
+                        <td><a href="{% url 'infoProducto' item.id %}"> {{ item.producto.nombre }} </a></td>
+                        <td> {{ item.producto.precioUnidad }} {{ item.producto.unidadMedida }} </td>
+                        <td> {{ item.cantidad }} </td>
+                        <td style="width: 10%;">
+                            <form class="form" method='GET' action={% url 'actualizaCarro' item.producto.id %}>
+                                <input class="center" name='cant' type='number' value='{{ item.cantidad }}'/>
+                                <button style="background-color: #26a69a;" class="btn-floating btn-small waves-effect waves-light"
+                                    type="submit"><i class="material-icons">add</i></button>
+                            </form>
+                        </td>
+                        <td><a class="modal-trigger" href='#borraProducto/{{ item.producto.id }}'><i class="material-icons prefix">delete</i></a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <br>
+            <div class="row">
+                <div class="col s12">
+                    <h5><strong>TOTAL: {{ carrito.total }} €</h5>
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col s12 push-s5">
+                    <a button class="btn waves-effect waves-light" href= "{% url 'index' %}"
+                        type="submit" name="action">Comprar</a>
+                </div>
+            </div>
+            {% else %}
+                <p>Su carrito esta vacío.</p>
+                <br>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+<!-- Modal Structure para borrar un producto del carrito -->
+{% for item in carrito.itemcarrito_set.all %}
+    <div id="borraProducto/{{ item.producto.id }}" class="modal">
+        <div class="modal-content">
+            <h4>ADVERTENCIA</h4>
+                <p>¿Está seguro que desea eliminar el producto <strong>{{ item.producto.nombre }}</strong> de su carro de compra?</p>
+        </div>
+        <div class="modal-footer">
+            <a href='{% url 'actualizaCarro' item.producto.id %}?cant=0' class="modal-close waves-effect waves-green btn-flat"><strong>Sí, eliminar producto</strong></a>
+            <a href="#!" class="modal-close waves-effect waves-green btn-flat"><strong>Cancelar</strong></a>
+        </div>
+    </div>
+{% endfor %}
+
+<!-- Scripts necesarios -->
+<script>
+    $(document).ready(function(){
+        $('.materialboxed').materialbox();
+    });
+</script>
+
+<script>
+    $(document).ready(function(){
+        $('.modal').modal();
+    });
+</script>
+
+{% endblock %}

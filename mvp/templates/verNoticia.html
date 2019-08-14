@@ -1,0 +1,48 @@
+{% extends "comunes/base.html" %}
+
+{% block title %}Ver noticia{% endblock %}
+
+{% block content %}
+
+<div class="container">
+<br><br>
+    <div class="card">
+
+        <div class="row">
+            <div class="col s12"><br>
+                <div class="left" style="padding-left: 10px;"><strong>{{ blog.fechaHora }}</strong></div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col s12">
+                <div class="center"><h5><strong>{{ blog.titulo }}</strong></h5></div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col s2">
+                {% if blog.foto %}
+                    <img class="circle responsive-img materialboxed" src="{{ blog.foto.url }}"
+                        style="width: 100px; height: 100px; background-repeat: no-repeat; background-size: cover;">
+                {% else %}
+                    <img class="circle responsive-img" src="static/img/imagen-no-disponible.png"
+                        style="width: 100px; height: 100px; background-repeat: no-repeat; background-size: cover;">
+                {% endif %}
+            </div>
+
+            <div class="row">
+                <p style="text-align: left; padding: 10px; text-align: justify;">{{ blog.articulo }}</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    $(document).ready(function(){
+        $('.materialboxed').materialbox();
+    });
+</script>
+
+{% endblock %}

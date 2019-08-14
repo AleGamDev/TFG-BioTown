@@ -1,0 +1,94 @@
+{% extends "comunes/base.html" %}
+
+{% block title %}Agregar servicio de recogida{% endblock %}
+
+{% block content %}
+
+    <form method="post" action="">
+    {% csrf_token %}
+
+    <div class="container" style="text-align:center;">
+
+        <h3><strong>Añada un servicio de recogida</strong></h3><br>
+
+        <div class="row">
+            <div class="col s6 push-s3">
+                <div class="row">
+
+                    <div class="row">
+                        <div class="col s11 push-s1"><br>
+                            <div class="center"><strong>Seleccione la ubicación de recogida en el mapa</strong></div>
+                            <div id="map" style="margin:12px 0 12px 0; height:300px;"></div>
+                                <input type="hidden" name="latitud" id="latitud">
+                                <input type="hidden" name="longitud" id="longitud">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <i class="material-icons prefix">add_location</i>
+                            <textarea name="direccion" id="textarea2" class="materialize-textarea" data-length="100"></textarea>
+                            <label for="{{ nuevaRecogida_form.direccion.id_for_label }}">Dirección textual</label>
+                            <span class="helper-text left-align">Por ejemplo: C/ Juan Ramírez Nº10</span>
+                            <font color="red"><p class="errores">{{ nuevaRecogida_form.direccion.errors }}</p></font>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <i class="material-icons prefix">list_alt</i>
+                            <textarea name="diasYHoras" id="textarea2" class="materialize-textarea" data-length="500"></textarea>
+                            <label for="{{ nuevaRecogida_form.diasYHoras.id_for_label }}">Horario de recogida (días y horas)</label>
+                            <span class="helper-text left-align">Por ejemplo: L--> 10:30 a 14:30; M--> 9:00 a 10:00</span>
+                            <font color="red"><p class="errores">{{ nuevaRecogida_form.diasYHoras.errors }}</p></font>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col s6">
+                            <button class="btn waves-effect waves-light" type="submit" name="action">Añadir</button>
+                        </div>
+                        <div class="col s6">
+                            <a button class="btn waves-effect waves-light" href= "{% url 'perfil' %}"
+                                name="action">Cancelar</a>
+                        </div>
+                    </div>
+
+                    </div>
+                </div>
+
+            </div><!--col-->
+        </div><!--row-->
+
+    </div><!--container-->
+    </form>
+
+<script>
+    $(document).ready(function() {
+        $('input#input_text, textarea#textarea2').characterCounter();
+    });
+</script>
+
+<script>
+	var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+		osmAttrib = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+		osm = L.tileLayer(osmUrl, {maxZoom: 16, attribution: osmAttrib});
+	var map = L.map('map').setView([37.38861, -5.99530], 13).addLayer(osm);
+
+    var selecciona;
+    // Añade una sóla marca al hacer click en el mapa.
+    function seleccionarUbicacion(e){
+        if(typeof(selecciona)==='undefined') {
+            selecciona = L.marker(e.latlng,{draggable: true}); // Cursor arrastrable
+            selecciona.addTo(map);
+        } else {
+            selecciona.setLatLng(e.latlng);
+        }
+        document.getElementById('latitud').value = e.latlng.lat;
+		document.getElementById('longitud').value = e.latlng.lng;
+    }
+
+    map.on('click', seleccionarUbicacion);
+</script>
+
+{% endblock %}

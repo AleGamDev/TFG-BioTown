@@ -1,0 +1,68 @@
+{% load staticfiles %}
+{% load leaflet_tags %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    {% block icon %}
+        <link rel="icon" href={% static "img/favicon.png" %} type="image/x-icon">
+    {% endblock %}
+
+    {% block css %}
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link type="text/css" rel="stylesheet" href={% static "css/materialize.css" %} media="screen,projection"/>
+        <link type="text/css" rel="stylesheet" href={% static "css/biotown.css" %} media="screen,projection"/>
+    {% endblock %}
+
+    {% block fonts %}
+        <link href="https://fonts.googleapis.com/css?family=Berkshire+Swash" rel="stylesheet">
+    {% endblock %}
+
+    {% leaflet_js %}
+    {% leaflet_css %}
+
+    <title>
+        {% block title %}BioTown - Comer sano no tiene por qué ser caro{% endblock %}
+    </title>
+</head>
+
+<body>
+    <style>
+        body {
+            background-color: #F6FFF6;
+            margin-left: 300px;
+            margin-right: 300px;
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        main {
+            flex: 1 0 auto;
+        }
+    </style>
+
+    {% block topHeader %}
+    {% include "comunes/topHeader.html" %}
+    {% endblock %}
+
+    {% block header %}
+    {% include "comunes/header.html" %}
+    {% endblock %}
+
+    {% block menu %}
+    {% include "comunes/menu.html" %}
+    {% endblock %}
+
+    {% block content %}
+    {% endblock %}
+
+    {% block footer %}
+    {% include "comunes/footer.html" %}
+    {% endblock %}
+
+    {% block js %}
+        <script type="text/javascript" src={% static "js/materialize.js" %}></script>
+    {% endblock %}
+
+</body>

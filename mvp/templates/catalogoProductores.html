@@ -1,0 +1,96 @@
+{% extends "comunes/base.html" %}
+
+{% block title %}Catálogo de productores{% endblock %}
+
+{% block content %}
+<br>
+
+<div class="container" style="text-align:center;">
+    <h3><strong>CATÁLOGO DE PRODUCTORES</strong></h3><br>
+</div>
+
+{% if total_productores %}
+    <div class="col s12 right-align" style="text-align:right;">
+        <p>Mostrando un total de: <strong>{{ total_productores }}
+        {% if total_productores == 1 %}
+            productor</strong></p>
+        {% else %}
+            productores</strong></p>
+        {% endif %}
+    </div>
+{% endif %}
+
+{% if not productores %}
+    <div class="col s12">
+        <h6 class="center-align">Aún no hay ningún productor registrado en el sistema</h6><br>
+    </div>
+{% else %}
+    {% for productor in productores %}
+    <div class="col s8">
+        <div class="card-panel hoverable grey lighten-5 z-depth-1">
+            <div class="row valign-wrapper center-align">
+
+                {% if productor.fotoLogo %}
+                <div class="col s2">
+                    <img class="circle responsive-img materialboxed" src="{{ productor.fotoLogo.url }}"
+                        style="width: 100px; height: 100px; background-repeat: no-repeat; background-size: cover;">
+                </div>
+                {% else %}
+                <div class="col s2">
+                    <img class="circle responsive-img materialboxed" src="static/img/imagen-no-disponible.png"
+                        style="width: 100px; height: 100px; background-repeat: no-repeat; background-size: cover;">
+                </div>
+                {% endif %}
+
+                <div class="col s2">
+                    <row><h6><strong>NOMBRE</strong></h6></row><br>
+                    <row>{{ productor.nombreEmpresa }}</row>
+                </div>
+
+                <div class="col s2">
+                    Aquí va el mapa con la direccion.
+                </div>
+
+                <div class="col s2"><br>
+                    <a button class="btn waves-effect waves-light" href="{% url 'infoProductor' productor.id %}" type="submit"
+                        name="action">Más info</a>
+                </div>
+
+            </div><!--row-->
+        </div><!--card-->
+    </div><!--col-->
+    {% endfor %}
+{% endif %}
+
+<!--Paginación de los productores-->
+{% if productores.has_other_pages %}
+    <ul class="pagination center">
+        {% if productores.has_previous %}
+            <li class="waves-effect"><a href="?page={{ productores.previous_page_number }}">
+                <i class="material-icons">chevron_left</i></a>
+            </li>
+        {% endif %}
+
+        {% for i in productores.paginator.page_range %}
+            {% if productores.number == i %}
+                <li class="active waves-effect"><a href="{{ i }}"><span>{{ i }}</span></a></li>
+            {% else %}
+                <li class="waves-effect"><a href="?page={{ i }}">{{ i }}</a></li>
+            {% endif %}
+        {% endfor %}
+
+        {% if productores.has_next %}
+            <li class="waves-effect"><a href="?page={{ productores.next_page_number }}">
+                <i class="material-icons">chevron_right</i></a>
+            </li>
+        {% endif %}
+    </ul>
+{% endif %}
+
+<script>
+    $(document).ready(function(){
+        $('.materialboxed').materialbox();
+    });
+</script>
+
+{% endblock %}

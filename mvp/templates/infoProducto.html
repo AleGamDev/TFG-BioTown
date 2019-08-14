@@ -1,0 +1,230 @@
+{% extends "comunes/base.html" %}
+
+{% block title %}Info producto{% endblock %}
+
+{% block content %}
+
+<div class="container"><br><br>
+
+    <!--Foto y datos del producto-->
+    <div class="row" style="align:center;">
+        <div class="col s12 card-panel grey lighten-5 z-depth-1">
+
+            <div class="col s3"><br><br>
+                <img class="circle responsive-img materialboxed" src="{{ producto.foto.url }}"
+                    style="width: 170px; height: 150px;">
+            </div>
+
+            <div class="col s9">
+                <div style="text-align: center;">
+                    <h3><strong>{{ producto.nombre }}</strong></h3><br>
+                </div>
+            </div>
+
+            <div class="col s6">
+                <div class="row">
+                    <div style="padding-left: 10px; padding-right: 10px;">
+                        <strong>Tipo:</strong> {{ producto.tipo }}
+                    </div>
+
+                    <div style="padding-left: 10px; padding-right: 10px;">
+                        <strong>Certificación:</strong> {{ producto.certificacion }}
+                    </div>
+
+                    <div style="padding-left: 10px; padding-right: 10px;">
+                        <strong>Productor:</strong> <a href="{% url 'infoProductor' producto.productor.id %}">{{ producto.productor }}</a>
+                    </div>
+
+                    <div style="padding-left: 10px; padding-right: 10px;">
+                        <strong>Información adicional:</strong> {{ producto.infoAdicional }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col s3">
+                <div style="padding-left: 10px; padding-right: 10px;">
+                    <strong>Precio:</strong> {{ producto.precioUnidad }} {{ producto.unidadMedida }}
+                </div><br>
+
+                {% if producto.stock == 'Sí' and user.consumidor %}
+                <div style="padding-left: 10px; padding-right: 10px;">
+                    <row><a button class="btn red lighten-1 waves-effect waves-light"
+                        href="{% url 'actualizaCarro' producto.id %}?cant=1" type="submit"
+                        name="action">Comprar</a>
+                    </row>
+                </div>
+                {% elif producto.stock == 'No' and user.consumidor %}
+                <div style="padding-left: 10px; padding-right: 10px;">
+                    <h6 style="color: #d50000;"><strong>SIN STOCK</strong></h6>
+                </div><br>
+                {% elif user.productor or user.administrador%}
+                {% else %}
+                <div style="padding-left: 10px; padding-right: 10px;">
+                    <strong><a href="{% url 'login' %}">Regístrese o inicie sesión</a> para comprar el producto.</strong>
+                </div>
+                {% endif %}
+
+            </div>
+
+        </div><!--card-->
+    </div><!--row-->
+
+    <div class="row"><div class="col s12 card"></div></div>
+
+    <!--Lista de todas las reseñas del producto-->
+    <div class="row" style="text-align:center;">
+        <div class="row">
+            <div class="col s3">
+                <div><h4><strong>RESEÑAS</strong></h4></div>
+            </div>
+        </div>
+        {% if not reseniasProducto %}
+        <div class="col s6">
+            <div><strong>Este producto no tienen ninguna reseña.</strong></div>
+        </div>
+        {% else %}
+            {% for resenia in reseniasProducto %}
+                <div class="col s12">
+                    <div class="card-panel hoverable grey lighten-5 z-depth-1">
+
+                        <div class="row valign-wrapper left-align">
+                            <div class="col s5">
+                                <row><strong>Usuario:</strong> {{ resenia.consumidor }}</row>
+                            </div>
+
+                            <div class="col s4">
+                                <row><strong>Fecha:</strong> {{ resenia.fechaHora }}</row>
+                            </div>
+
+                            <div class="col s3">
+                                {% if resenia.calificacion == '1' %}
+                                    <row>
+                                        <strong>Calificación: </strong>
+                                        <i class="tiny material-icons">star</i>
+                                        <i class="tiny material-icons">star_border</i>
+                                        <i class="tiny material-icons">star_border</i>
+                                        <i class="tiny material-icons">star_border</i>
+                                        <i class="tiny material-icons">star_border</i>
+                                    </row>
+                                {% elif resenia.calificacion == '2' %}
+                                    <row>
+                                        <strong>Calificación: </strong>
+                                        <i class="tiny material-icons">star</i>
+                                        <i class="tiny material-icons">star</i>
+                                        <i class="tiny material-icons">star_border</i>
+                                        <i class="tiny material-icons">star_border</i>
+                                        <i class="tiny material-icons">star_border</i>
+                                    </row>
+                                {% elif resenia.calificacion == '3' %}
+                                    <row>
+                                        <strong>Calificación: </strong>
+                                        <i class="tiny material-icons">star</i>
+                                        <i class="tiny material-icons">star</i>
+                                        <i class="tiny material-icons">star</i>
+                                        <i class="tiny material-icons">star_border</i>
+                                        <i class="tiny material-icons">star_border</i>
+                                    </row>
+                                {% elif resenia.calificacion == '4' %}
+                                    <row>
+                                        <strong>Calificación: </strong>
+                                        <i class="tiny material-icons">star</i>
+                                        <i class="tiny material-icons">star</i>
+                                        <i class="tiny material-icons">star</i>
+                                        <i class="tiny material-icons">star</i>
+                                        <i class="tiny material-icons">star_border</i>
+                                    </row>
+                                {% elif resenia.calificacion == '5' %}
+                                    <row>
+                                        <strong>Calificación: </strong>
+                                        <i class="tiny material-icons">star</i>
+                                        <i class="tiny material-icons">star</i>
+                                        <i class="tiny material-icons">star</i>
+                                        <i class="tiny material-icons">star</i>
+                                        <i class="tiny material-icons">star</i>
+                                    </row>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row valign-wrapper left-align">
+                            <div class="col s12"><br>
+                                <row><strong>Comentario: </strong> {{ resenia.comentario }}</row>
+                            </div>
+                        </div>
+
+                    </div><!--card-->
+                </div><!--col-->
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!--Formulario para agregar una reseña (sólo consumidores)-->
+    {% if user.consumidor %}
+    <div class="row"><div class="col s12 card"></div></div>
+    <div class="row">
+        <div class="col s12">
+            <div class="right"><strong>Agregue una reseña si lo desea pulsando </strong>
+            <a class="modal-trigger" href="#reseña">AQUÍ</a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Modal Structure -->
+    <div id="reseña" class="modal bottom-sheet">
+        <div class="modal-content">
+            <h4>Escriba una opinión sobre: <strong>{{ producto.nombre }}</strong></h4><br>
+
+            <form method="post" action="{% url 'infoProducto' producto.id %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row">
+                <div class="input-field col s1">
+                    <i class="material-icons prefix">star</i>
+                    {{ resProducto_form.calificacion }}
+                    <label for="{{ resProducto_form.calificacion.id_for_label }}">Calificación</label>
+                    <font color="red"><p class="errores">{{ resProducto_form.calificacion.errors }}</p></font>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="input-field col s6">
+                    <i class="material-icons prefix">add_comment</i>
+                    <textarea name="comentario" id="textarea2" class="materialize-textarea" data-length="200"></textarea>
+                    <label for="{{ resProducto_form.comentario.id_for_label }}">Comentario</label>
+                    <font color="red"><p class="errores">{{ resProducto_form.comentario.errors }}</p></font>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn waves-effect waves-light left" type="submit" name="action">Añadir reseña</button>
+        </div>
+    </div>
+
+</div><br><!--container-->
+
+<script>
+    $(document).ready(function(){
+        $('select').formSelect();
+    })
+</script>
+
+<script>
+    $(document).ready(function(){
+        $('.materialboxed').materialbox();
+    });
+</script>
+
+<script>
+    $(document).ready(function() {
+        $('input#input_text, textarea#textarea2').characterCounter();
+    });
+</script>
+
+<script>
+    $(document).ready(function(){
+        $('.modal').modal();
+    });
+</script>
+
+{% endblock %}

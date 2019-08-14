@@ -1,0 +1,49 @@
+{% extends "comunes/base.html" %}
+
+{% block title %}Ver mensaje{% endblock %}
+
+{% block content %}
+
+<div class="container">
+<br><br>
+    <div class="card">
+
+        <div class="row">
+            <div class="col s12"><br>
+                <div class="left" style="padding-left: 10px;">De: <strong>{{ mensaje.emisor }}</strong></div>
+                <div class="right" style="padding-right: 10px;">Para: <strong>{{ mensaje.receptor }}</strong></div>
+                <div class="center"><strong>{{ mensaje.fechaHora }}</strong></div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col s12">
+                <div class="left" style="padding-left: 10px;"><h5><strong>{{ mensaje.titulo }}</strong></h5></div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="row">
+                <p style="text-align: left; padding-left: 10px; text-align: justify;">{{ mensaje.comentario }}</p>
+            </div>
+        </div>
+
+    </div><br>
+
+    <div class="row">
+        <div class="col s12">
+            {% if user == mensaje.emisor %}
+                <a button class="btn waves-effect waves-light left" href= "{% url 'enviarMensaje' mensaje.receptor.id %}"
+                    type="submit" name="action">Enviar nuevo mensaje</a>
+            {% elif user == mensaje.receptor %}
+                <a button class="btn waves-effect waves-light left" href= "{% url 'enviarMensaje' mensaje.emisor.id %}"
+                    type="submit" name="action">Responder</a>
+            {% endif %}
+            <a button class="btn waves-effect waves-light right" href= "{% url 'perfil' %}"
+                type="submit" name="action">Volver atrás</a>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

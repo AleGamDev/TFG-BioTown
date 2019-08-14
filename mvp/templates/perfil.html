@@ -1,0 +1,720 @@
+{% extends "comunes/base.html" %}
+
+{% block title %}Perfil privado{% endblock %}
+
+{% block content %}
+<br>
+
+<!--EL PRIMERO: SI ES UN CONSUMIDOR-->
+{% if user.consumidor %}
+
+<!--Barra de perfil consumidor-->
+<div class="container" style="display: flex;">
+    <div class="row">
+        <div class="col">
+            <nav class="nav-extended">
+                <ul class="tabs tabs-transparent">
+                    <li class="tab"><a href="#datos">MIS DATOS</a></li>
+                    <li class="tab"><a href="#pedidos">MIS PEDIDOS</a></li>
+                    {% if nuevos %}
+                        <li class="tab"><a href="#mensajes">MIS MENSAJES<span class="new badge">{{ nuevos }}</span></a></li>
+                    {% elif nuevos == 0 %}
+                        <li class="tab"><a href="#mensajes">MIS MENSAJES</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div><!--col-->
+    </div><!--row-->
+</div>
+
+<!--Datos consumidor-->
+<div id="datos">
+    <h3 class="center-align"><strong>DATOS DEL USUARIO</strong></h3>
+    <br>
+    <div class="container" style="text-align: center;">
+        <div class="row">
+            <div class="col s6 push-s3">
+                <div class="row">
+                    <div class="col"><i class="material-icons">account_circle</i></div>
+                    <div class="col"><strong>Nombre de usuario:</strong> {{ user.username }}</div>
+                </div>
+
+                <div class="row">
+                    <div class="col"><i class="material-icons">email</i></div>
+                    <div class="col"><strong>Dirección email:</strong> {{ user.email }}</div>
+                </div>
+
+                <div class="row">
+                    <div class="col"><i class="material-icons">person</i></div>
+                    <div class="col"><strong>Nombre y apellidos:</strong> {{ user.nombre }} {{ user.apellidos }}</div>
+                </div><br>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="container center-align">
+                <div class="row">
+                    <div class="col s5 push-s1">
+                        <a button class="btn waves-effect waves-light center" href= "{% url 'editarConsumidor' %}"
+                            type="submit" name="action">Modificar datos</a>
+                    </div>
+                    <div class="col s5 push-s1">
+                        <a button class="btn waves-effect waves-light center" href= "{% url 'cambiarContraseña' %}"
+                            type="submit" name="action">Cambiar contraseña</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div><!--container-->
+</div>
+
+<!--Pedidos consumidor-->
+<div id="pedidos" class="col s12">Aquí van los pedidos de dicho consumidor.</div>
+
+<!--Mensajes consumidor-->
+<div id="mensajes" class="col s12">
+    <h3 class="center-align"><strong>MIS MENSAJES</strong></h3>
+    <br>
+    <div class="container center-align" style="justify-content: center;">
+        <div>
+            {% if mis_mensajes %}
+            <table class="highlight centered">
+                <thead>
+                    <tr>
+                        <th>Ver</th>
+                        <th>Fecha</th>
+                        <th>Título</th>
+                        <th>Emisor</th>
+                        <th>Receptor</th>
+                        <th>Visto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mensaje in mis_mensajes %}
+                    <tr>
+                        <td><a href="{% url 'verMensaje' mensaje.id %}"><i class="material-icons prefix">message</i></a></td>
+                        <td> {{ mensaje.fechaHora }} </td>
+                        <td> {{ mensaje.titulo }} </td>
+                        {% if user == mensaje.emisor%}
+                            <td><strong> Yo </strong></td>
+                        {% else %}
+                            <td> {{ mensaje.emisor }} </td>
+                        {% endif %}
+                        {% if user == mensaje.receptor%}
+                            <td><strong> Yo </strong></td>
+                        {% else %}
+                            <td> {{ mensaje.receptor }} </td>
+                        {% endif %}
+                        {% if mensaje.leido == False %}
+                            <td><p style="color: #b71c1c;"><strong>No</strong></p></td>
+                        {% else %}
+                            <td><p style="color: #2e7d32;"><strong>Sí</strong></p></td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <br>
+            {% else %}
+                <p>No tiene ningún mensaje.</p>
+                <br>
+            {% endif %}<br><br>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+
+<!--EL SEGUNDO: SI ES UN PRODUCTOR-->
+{% if user.productor %}
+
+<!--Barra de perfil productor-->
+<div class="container" style="display: flex;">
+    <div class="row">
+        <div class="col">
+            <nav class="nav-extended">
+                <ul class="tabs tabs-transparent">
+                    <li class="tab"><a href="#datos">MIS DATOS</a></li>
+                    <li class="tab"><a href="#productos">MIS PRODUCTOS</a></li>
+                    <li class="tab"><a href="#recYrep">RECOGIDA Y REPARTO</a></li>
+                    <li class="tab"><a href="#cobro">MIS COBROS</a></li>
+                    {% if nuevos %}
+                        <li class="tab"><a href="#mensajes">MIS MENSAJES<span class="new badge">{{ nuevos }}</span></a></li>
+                    {% elif nuevos == 0 %}
+                        <li class="tab"><a href="#mensajes">MIS MENSAJES</a></li>
+                    {% endif %}
+                    <li class="tab"><a href="#pedidos">PEDIDOS</a></li>
+                </ul>
+            </nav>
+        </div><!--col-->
+    </div><!--row-->
+</div>
+
+<!--Datos productor-->
+<div id="datos">
+    <h3 class="center-align"><strong>DATOS DEL USUARIO</strong></h3>
+    <br>
+    <div class="container center-align" style="justify-content: center;">
+        <div class="row">
+
+            {% if productor.fotoLogo %}
+            <div class="col s3 push-s1">
+                <div class="card">
+                    <div class="card-image" >
+                        <img src="{{ user.productor.fotoLogo.url }}" style="height:180px;">
+                    </div>
+                    <div class="card-content"><strong>Foto de perfil</strong></div>
+                </div>
+            </div>
+            {% else %}
+            <div class="col s3 push-s1">
+                <div class="card">
+                    <div class="card-image" >
+                        <img src="static/img/imagen-no-disponible.png" style="height:180px;">
+                    </div>
+                    <div class="card-content"><strong>Foto de perfil</strong></div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="col s7 push-s1"><br>
+                <div class="row">
+                    <div class="col"><i class="material-icons">account_circle</i></div>
+                    <div class="col"><strong>Nombre de usuario:</strong> {{ user.username }}</div>
+                </div>
+                <div class="row">
+                    <div class="col"><i class="material-icons prefix">home</i></div>
+                    <div class="col"><strong>Nombre de empresa:</strong> {{ user.productor.nombreEmpresa }}</div>
+                </div>
+                <div class="row">
+                    <div class="col"><i class="material-icons prefix">email</i></div>
+                    <div class="col"><strong>Dirección email:</strong> {{ user.email }}</div>
+                </div>
+                <div class="row">
+                    <div class="col"><i class="material-icons prefix">phone</i></div>
+                    <div class="col"><strong>Teléfono:</strong> {{ user.productor.telefono }}</div>
+                </div>
+                <div class="row">
+                    <div class="col"><i class="material-icons prefix">person</i></div>
+                    <div class="col"><strong>Nombre y apellidos:</strong> {{ user.nombre }} {{ user.apellidos }}</div>
+                </div>
+            </div>
+        </div><!--row-->
+
+        <div class="row">
+            <div class="col s10 push-s1">
+                <div class="row">
+                    <div class="col"><i class="material-icons prefix">description</i><strong></div>
+                    <div class="col">Descripción de la empresa:</strong></div>
+                    <div class="row">
+                        <div class="col"> {{ user.productor.descripcion }}</div>
+                    </div>
+                </div>
+            </div>
+        </div><!--row-->
+    </div><!--container-->
+
+    <br>
+    <div class="container center-align">
+        <div class="row">
+            <div class="col s5 push-s1">
+                <a button class="btn waves-effect waves-light center" href= "{% url 'editarProductor' %}"
+                    type="submit" name="action">Modificar datos</a>
+            </div>
+            <div class="col s5 push-s1">
+                <a button class="btn waves-effect waves-light center" href= "{% url 'cambiarContraseña' %}"
+                    type="submit" name="action">Cambiar contraseña</a>
+            </div>
+        </div>
+    </div><!--container-->
+</div>
+
+<!--Productos productor-->
+<div id="productos" class="col s12">
+    <h3 class="center-align"><strong>PRODUCTOS REGISTRADOS</strong></h3>
+    <br>
+    <div class="container center-align" style="justify-content: center;">
+        <div class="mis-productos">
+            {% if mis_productos %}
+            <table class="highlight centered">
+                <thead>
+                    <tr>
+                        <th>Foto</th>
+                        <th>Nombre</th>
+                        <th>Tipo</th>
+                        <th>Precio</th>
+                        <th>Stock</th>
+                        <th>Certificación</th>
+                        <th>Modificar</th>
+                        <th>Eliminar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for producto in mis_productos %}
+                    <tr>
+                        <td><img class="materialboxed center-block" src="{{ producto.foto.url }}" style="height:80px;"></td>
+                        <td> {{ producto.nombre }} </td>
+                        <td> {{ producto.tipo }} </td>
+                        <td> {{ producto.precioUnidad }} {{ producto.unidadMedida }} </td>
+                        <td> {{ producto.stock }} </td>
+                        <td> {{ producto.certificacion }} </td>
+                        <td><a href="{% url 'editarProducto' producto.id %}"><i class="material-icons prefix">create</i></a></td>
+                        <td><a class="modal-trigger" href='#borrarProducto/{{ producto.id }}/'><i class="material-icons prefix">delete</i></a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <br>
+            {% else %}
+                <p> Actualmente no tiene ningún producto registrado en el sistema.</p>
+                <br>
+            {% endif %}
+            <div class="container center-align">
+                <div class="row">
+                    <a button class="btn waves-effect waves-light center" href= "{% url 'nuevoProducto' %}"
+                        type="submit" name="action">Añadir producto</a>
+                </div>
+            </div><!--container-->
+        </div>
+    </div>
+</div>
+
+<!-- Modal Structure para borrar un producto del sistema -->
+{% for producto in mis_productos %}
+    <div id="borrarProducto/{{ producto.id }}/" class="modal">
+        <div class="modal-content">
+            <h4>ADVERTENCIA</h4>
+                <p>¿Está seguro que desea borrar el producto: <strong>{{ producto.nombre }}</strong>?</p>
+        </div>
+        <div class="modal-footer">
+            <a href='borrarProducto/{{ producto.id }}' class="modal-close waves-effect waves-green btn-flat"><strong>Sí, borrar producto</strong></a>
+            <a href="#!" class="modal-close waves-effect waves-green btn-flat"><strong>Cancelar</strong></a>
+        </div>
+    </div>
+{% endfor %}
+
+<!--Recogida y reparto productor-->
+<div id="recYrep" class="col s12"><br>
+    <div class="row">
+        <div class="col s5 push-s1">
+            {% if not recogida_user %}
+                <div class="card">
+                    <div><h4 style="text-align: center;"><strong><br>RECOGIDA</strong></h4></div>
+                    <div><p style="text-align: left; padding: 20px; text-align: justify;">Actualmente, <strong>no cuenta con
+                    un servicio de recogida</strong> con el cual los consumidores puedan recoger sus productos.<br>
+                    Si desea añadir este servicio, pulse en el botón que se muestra abajo para añadir uno.<br>
+                    Tras esto, este servicio se mostrará en su catálogo, para el uso de los consumidores del sistema.</p>
+                    </div>
+                    <div class="container center-align">
+                        <div class="row">
+                            <a button class="btn waves-effect waves-light center" href= "{% url 'nuevaRecogida' %}"
+                                type="submit" name="action">Añadir recogida</a>
+                        </div>
+                    </div>
+                    <br>
+                </div>
+            {% else %}
+                {% for recogida in recogida_user %}
+                <div class="card">
+                    <div><h4 style="text-align: center;"><strong><br>RECOGIDA ACTUAL</strong></h4></div><br>
+
+                    <div class="row" style="text-align: left; padding-left: 20px;">
+                        <div class="col"><i class="material-icons prefix">place</i><strong></div>
+                        <div class="col">Dirección:</strong></div>
+                        <div class="row">
+                            <div class="col">{{ recogida.direccion }}</div>
+                        </div>
+                    </div>
+
+                    <div class="row" style="text-align: left; padding-left: 20px;">
+                        <div class="col"><i class="material-icons prefix">list_alt</i><strong></div>
+                        <div class="col">Horario de recogida:</strong></div>
+                        <div class="row">
+                            <div class="col">{{ recogida.diasYHoras }}</div>
+                        </div>
+                    </div>
+
+                    <div class="container center-align">
+                        <div class="row">
+                            <a button class="btn waves-effect waves-light center" href= "{% url 'editarRecogida' %}"
+                                type="submit" name="action">Modificar recogida</a>
+                        </div>
+                    </div>
+                    <br>
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+        <div class="col s5 push-s1">
+            {% if reparto_user %}
+                {% for reparto in reparto_user %}
+                <div class="card">
+                    <div><h4 style="text-align: center;"><strong><br>REPARTO ACTUAL</strong></h4></div><br>
+
+                    <div class="row" style="text-align: left; padding-left: 20px;">
+                        <div class="col"><i class="material-icons prefix">list_alt</i><strong></div>
+                        <div class="col">Horario de reparto:</strong></div>
+                        <div class="row">
+                            <div class="col">{{ reparto.diasYHoras }}</div>
+                        </div>
+                    </div>
+
+                    <div class="container center-align">
+                        <div class="row">
+                            <a button class="btn waves-effect waves-light center" href= "{% url 'editarReparto' %}"
+                                type="submit" name="action">Modificar reparto</a>
+                        </div>
+                    </div>
+                    <br>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="card">
+                    <div><h4 style="text-align: center;"><strong><br>REPARTO</strong></h4></div>
+                    <div><p style="text-align: left; padding: 20px; text-align: justify;"><strong>No tiene registrado</strong> en el sistema un
+                        servicio de reparto de sus productos a un domicilio o una dirección específica proporcionada por los clientes del sistema.<br>
+                        Si como empresa, ya cuenta con un servicio propio de reparto a domicilio, pulse en "Añadir" e informe ahora a sus clientes.</p>
+                    </div>
+                    <div class="container center-align">
+                        <div class="row">
+                            <a button class="btn waves-effect waves-light center" href= "{% url 'nuevoReparto' %}"
+                                type="submit" name="action">Añadir reparto</a>
+                        </div>
+                    </div>
+                    <br>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!--Cobro productor-->
+<div id="cobro" class="col s12"><br>
+    <div class="row">
+        <div class="col s6 push-s3">
+            {% if not tipoCobro %}
+                <div class="card center">
+                    <div><h4 style="text-align: center;"><strong><br>FORMA DE COBRO</strong></h4></div>
+                    <div><p style="text-align: left; padding: 20px; text-align: justify;"><strong>No tiene registrada</strong> en su
+                    cuenta una forma de cobro con la cual sus clientes puedan tener información acerca del pago aceptado en sus productos.<br>
+                    Si desea añadir esta información, pulse en el botón que se muestra abajo para añadirla.<br>
+                    Tras agregarlo, se mostrará en la información de su catálogo, para el uso de los clientes del sistema.</p>
+                    </div>
+                    <div class="container center-align">
+                        <div class="row">
+                            <a button class="btn waves-effect waves-light center" href= "{% url 'nuevaFormaCobro' %}"
+                                type="submit" name="action">Añadir forma de cobro</a>
+                        </div>
+                    </div>
+                    <br>
+                </div>
+            {% else %}
+                {% for cobro in tipoCobro %}
+                <div class="card">
+                    <div><h4 style="text-align: center;"><strong><br>FORMA DE COBRO ACTUAL</strong></h4></div><br>
+
+                    <div class="row" style="text-align: left; padding-left: 20px;">
+                        <div class="col"><i class="material-icons prefix">local_atm</i><strong></div>
+                        <div class="col">Forma de cobro:</strong></div>
+                        <div class="row">
+                            <div class="col">{{ cobro.tipoCobro }}</div>
+                        </div>
+                    </div>
+
+                    <div class="container center-align">
+                        <div class="row">
+                            <a button class="btn waves-effect waves-light center" href= "{% url 'editarFormaCobro' %}"
+                                type="submit" name="action">Modificar forma de cobro</a>
+                        </div>
+                    </div>
+                    <br>
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!--Mensajes productor-->
+<div id="mensajes" class="col s12">
+    <h3 class="center-align"><strong>MIS MENSAJES</strong></h3>
+    <br>
+    <div class="container center-align" style="justify-content: center;">
+        <div>
+            {% if mis_mensajes %}
+            <table class="highlight centered">
+                <thead>
+                    <tr>
+                        <th>Ver</th>
+                        <th>Fecha</th>
+                        <th>Título</th>
+                        <th>Emisor</th>
+                        <th>Receptor</th>
+                        <th>Visto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mensaje in mis_mensajes %}
+                    <tr>
+                        <td><a href="{% url 'verMensaje' mensaje.id %}"><i class="material-icons prefix">message</i></a></td>
+                        <td> {{ mensaje.fechaHora }} </td>
+                        <td> {{ mensaje.titulo }} </td>
+                        {% if user == mensaje.emisor%}
+                            <td><strong> Yo </strong></td>
+                        {% else %}
+                            <td> {{ mensaje.emisor }} </td>
+                        {% endif %}
+                        {% if user == mensaje.receptor%}
+                            <td><strong> Yo </strong></td>
+                        {% else %}
+                            <td> {{ mensaje.receptor }} </td>
+                        {% endif %}
+                        {% if mensaje.leido == False %}
+                            <td><p style="color: #b71c1c;"><strong>No</strong></p></td>
+                        {% else %}
+                            <td><p style="color: #2e7d32;"><strong>Sí</strong></p></td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <br>
+            {% else %}
+                <p>No tiene ningún mensaje.</p>
+                <br>
+            {% endif %}<br><br>
+        </div>
+    </div>
+</div>
+
+<!--Pedidos productor-->
+<div id="pedidos" class="col s12">Aquí van los pedidos de dicho productor.</div>
+{% endif %}
+
+
+<!--EL TERCERO: SI ES UN ADMIN-->
+{% if user.administrador %}
+
+<!--Barra de perfil administrador-->
+<div class="container" style="display: flex;">
+    <div class="row">
+        <div class="col">
+            <nav class="nav-extended">
+                <ul class="tabs tabs-transparent">
+                    <li class="tab"><a href="#blog">ADMINISTRAR BLOG</a></li>
+                    <li class="tab"><a href="#usuarios">ADMINISTRAR USUARIOS</a></li>
+                    {% if nuevos %}
+                        <li class="tab"><a href="#mensajes">MIS MENSAJES<span class="new badge">{{ nuevos }}</span></a></li>
+                    {% elif nuevos == 0 %}
+                        <li class="tab"><a href="#mensajes">MIS MENSAJES</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div><!--col-->
+    </div><!--row-->
+</div>
+
+<!--Blog administrador-->
+<div id="blog" class="col s12">
+    <h3 class="center-align"><strong>NOTICIAS DEL BLOG</strong></h3>
+    <br>
+    <div class="container center-align" style="justify-content: center;">
+        <div class="mis-blogs">
+            {% if mis_blogs %}
+            <table class="highlight centered">
+                <thead>
+                    <tr>
+                        <th>Foto</th>
+                        <th>Título</th>
+                        <th>Fecha</th>
+                        <th>Modificar</th>
+                        <th>Eliminar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for blog in mis_blogs %}
+                    <tr>
+                        <td>
+                        {% if blog.foto %}
+                            <img class="materialboxed center-block" src="{{ blog.foto.url }}" style="height:80px;"></td>
+                        {% else %}
+                            <img class="center-block" src="static/img/imagen-no-disponible.png" style="height:80px;"></td>
+                        {% endif %}
+                        <td> {{ blog.titulo }} </td>
+                        <td> {{ blog.fechaHora }} </td>
+                        <td><a href="{% url 'editarBlog' blog.id %}"><i class="material-icons prefix">create</i></a></td>
+                        <td><a class="modal-trigger" href='#borrarBlog/{{ blog.id }}/'><i class="material-icons prefix">delete</i></a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <br>
+            {% else %}
+                <p> Actualmente no hay ninguna noticia registrada en el sistema.</p>
+                <br>
+            {% endif %}
+            <div class="container center-align">
+                <div class="row">
+                    <a button class="btn waves-effect waves-light center" href= "{% url 'nuevoBlog' %}"
+                        type="submit" name="action">Añadir noticia</a>
+                </div>
+            </div><!--container--><br>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Structure para borrar una noticia del sistema -->
+{% for blog in mis_blogs %}
+    <div id="borrarBlog/{{ blog.id }}/" class="modal">
+        <div class="modal-content">
+            <h4>ADVERTENCIA</h4>
+                <p>¿Está seguro que desea borrar esta noticia?</p>
+        </div>
+        <div class="modal-footer">
+            <a href='borrarBlog/{{ blog.id }}' class="modal-close waves-effect waves-green btn-flat"><strong>Sí, borrar noticia</strong></a>
+            <a href="#!" class="modal-close waves-effect waves-green btn-flat"><strong>Cancelar</strong></a>
+        </div>
+    </div>
+{% endfor %}
+
+<!--Usuarios administrador-->
+<div id="usuarios" class="col s12">
+    <h3 class="center-align"><strong>USUARIOS REGISTRADOS EN EL SISTEMA</strong></h3>
+    <br>
+    <div class="container center-align" style="justify-content: center;">
+        <div class="los-usuarios">
+            {% if los_usuarios %}
+            <table class="highlight centered">
+                <thead>
+                    <tr>
+                        <th>Nombre de usuario</th>
+                        <th>Nombre</th>
+                        <th>Apellidos</th>
+                        <th>Email</th>
+                        <th>Tipo</th>
+                        <th>Enviar mensaje</th>
+                        <th>Eliminar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for usuario in los_usuarios %}
+                    <tr>
+                        <td> {{ usuario.username }} </td>
+                        <td> {{ usuario.nombre }} </td>
+                        <td> {{ usuario.apellidos }} </td>
+                        <td> {{ usuario.email }} </td>
+                        {% if usuario.administrador %}
+                            <td><strong>Administrador</strong></td>
+                        {% elif usuario.consumidor %}
+                            <td><p style="color: #b71c1c;"><strong>Consumidor</strong></p></td>
+                        {% elif usuario.productor %}
+                            <td><p style="color: #2e7d32;"><strong>Productor</strong></td>
+                        {% endif %}
+                        <td><a href="{% url 'enviarMensaje' usuario.id %}"><i class="material-icons prefix">mail</i></a></td>
+                        {% if usuario.administrador %}
+                            <td> - </td>
+                        {% else %}
+                            <td><a class="modal-trigger" href='#borrarUsuario/{{ usuario.id }}/'><i class="material-icons prefix">delete</i></a></td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <br>
+            {% else %}
+                <p> Actualmente no hay ningún usuario registrado en el sistema.</p>
+                <br>
+            {% endif %}<br>
+        </div>
+    </div>
+</div>
+
+<!--Mensajes administrador-->
+<div id="mensajes" class="col s12">
+    <h3 class="center-align"><strong>MIS MENSAJES</strong></h3>
+    <br>
+    <div class="container center-align" style="justify-content: center;">
+        <div>
+            {% if mis_mensajes %}
+            <table class="highlight centered">
+                <thead>
+                    <tr>
+                        <th>Ver</th>
+                        <th>Fecha</th>
+                        <th>Título</th>
+                        <th>Emisor</th>
+                        <th>Receptor</th>
+                        <th>Visto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mensaje in mis_mensajes %}
+                    <tr>
+                        <td><a href="{% url 'verMensaje' mensaje.id %}"><i class="material-icons prefix">message</i></a></td>
+                        <td> {{ mensaje.fechaHora }} </td>
+                        <td> {{ mensaje.titulo }} </td>
+                        {% if user == mensaje.emisor%}
+                            <td><strong> Yo </strong></td>
+                        {% else %}
+                            <td> {{ mensaje.emisor }} </td>
+                        {% endif %}
+                        {% if user == mensaje.receptor%}
+                            <td><strong> Yo </strong></td>
+                        {% else %}
+                            <td> {{ mensaje.receptor }} </td>
+                        {% endif %}
+                        {% if mensaje.leido == False %}
+                            <td><p style="color: #b71c1c;"><strong>No</strong></p></td>
+                        {% else %}
+                            <td><p style="color: #2e7d32;"><strong>Sí</strong></p></td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <br>
+            {% else %}
+                <p>No tiene ningún mensaje.</p>
+                <br>
+            {% endif %}<br><br>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Modal Structure para borrar un usuario del sistema -->
+{% for usuario in los_usuarios %}
+    <div id="borrarUsuario/{{ usuario.id }}/" class="modal">
+        <div class="modal-content">
+            <h4>ADVERTENCIA</h4>
+                <p>¿Está seguro que desea eliminar del sistema al usuario:
+                <strong>{{ usuario.username }} - {{ usuario.nombre }}, {{ usuario.apellidos }}</strong>?</p>
+        </div>
+        <div class="modal-footer">
+            <a href='borrarUsuario/{{ usuario.id }}' class="modal-close waves-effect waves-green btn-flat"><strong>Sí, eliminar usuario</strong></a>
+            <a href="#!" class="modal-close waves-effect waves-green btn-flat"><strong>Cancelar</strong></a>
+        </div>
+    </div>
+{% endfor %}
+
+<!-- Scripts necesarios -->
+<script>
+    $(document).ready(function(){
+        $('.tabs').tabs();
+    });
+</script>
+
+<script>
+    $(document).ready(function(){
+        $('.modal').modal();
+    });
+</script>
+
+<script>
+    $(document).ready(function(){
+        $('.materialboxed').materialbox();
+    });
+</script>
+
+{% endblock %}

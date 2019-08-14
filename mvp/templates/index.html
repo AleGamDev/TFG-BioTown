@@ -1,0 +1,50 @@
+{% extends "comunes/base.html" %}
+
+{% block title %}BioTown{% endblock %}
+
+{% block content %}
+
+<div class="col s12 center">
+    <h2 style="font-family: 'Berkshire Swash';">Bienvenidos a BioTown</h2>
+</div>
+
+<div class="col s12 left">
+    <h6 style="padding-left: 20px;">Últimas noticias del blog:</h6>
+</div>
+
+{% if noticiasBlog %}
+    {% for noticia in noticiasBlog %}
+        <div class="card-panel hoverable grey lighten-5 z-depth-1">
+
+            <div class="row">
+
+                <div class="col s2">
+                    {% if noticia.foto %}
+                        <img class="circle responsive-img center" src="{{ noticia.foto.url }}"
+                            style="width: 100px; height: 100px; background-repeat: no-repeat; background-size: cover;">
+                    {% else %}
+                        <img class="circle responsive-img center" src="static/img/imagen-no-disponible.png"
+                            style="width: 100px; height: 100px; background-repeat: no-repeat; background-size: cover;">
+                    {% endif %}
+                </div>
+
+                <div class="col s10">
+                    <div class="row">
+                        <div class="right"><strong>Publicada:</strong> {{ noticia.fechaHora }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="left"><a href="{% url 'verNoticia' noticia.id %}">{{ noticia.titulo }}</a></div>
+                    </div>
+                    <div class="row">
+                        <p class="truncate" style="text-align: left;">{{ noticia.articulo }}</p>
+                    </div>
+                </div>
+
+            </div><!--row-->
+
+        </div><!--card-->
+    {% endfor %}
+{% endif %}
+
+
+{% endblock %}

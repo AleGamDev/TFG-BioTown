@@ -1,0 +1,107 @@
+{% extends "comunes/base.html" %}
+
+{% block title %}Catálogo productos{% endblock %}
+
+{% block content %}
+
+<div class="container"><br>
+
+    <!--Título-->
+    <div class="container" style="text-align:center;">
+        <h3><strong>CATÁLOGO DE PRODUCTOS</strong></h3><br>
+    </div>
+    <br>
+
+    <!--Mostrando todos los productos-->
+    {% if total_productos %}
+        <div class="col s12 right-align">
+            <p>Mostrando un total de: <strong>{{ total_productos }}
+            {% if total_productos == 1 %}
+                producto</strong></p>
+            {% else %}
+                productos</strong></p>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <!--Lista de productos con sus características-->
+    {% if not productos %}
+        <div class="col s12">
+            <h6 class="center-align">Aún no hay ningún producto registrado de: <strong>{{ tipo }}</strong></h6><br>
+        </div>
+    {% else %}
+        {% for producto in productos %}
+            <div class="col s12">
+                <div class="card-panel hoverable grey lighten-5 z-depth-1">
+                    <div class="row valign-wrapper center-align">
+
+                        <div class="col s2">
+                            <img class="circle responsive-img materialboxed" src="{{ producto.foto.url }}"
+                                style="width: 100px; height: 100px; background-repeat: no-repeat; background-size: cover;">
+                        </div>
+
+                        <div class="col s4">
+                            <row><h6><strong>NOMBRE</strong></h6></row><br>
+                            <row>{{ producto.nombre }}</row>
+                        </div>
+
+                        <div class="col s3">
+                            <row><h6><strong>PRECIO</strong></h6></row><br>
+                            <row>{{ producto.precioUnidad }} {{ producto.unidadMedida }}</row>
+                        </div>
+
+                        <div class="col s3">
+                            <br>
+                            <row><a button class="btn waves-effect waves-light" href="{% url 'infoProducto' producto.id %}" type="submit"
+                                name="action">Ver producto</a>
+                            </row>
+                            {% if user.consumidor and producto.stock == 'Sí' %}
+                                <br><br>
+                                <row><a button class="btn red lighten-1 waves-effect waves-light"
+                                    href="{% url 'actualizaCarro' producto.id %}?cant=1" type="submit"
+                                    name="action">Comprar</a>
+                            </row>
+                            {% endif %}
+                        </div>
+
+                    </div><!--row-->
+                </div><!--card-->
+            </div><!--col-->
+            <br>
+        {% endfor %}
+    {% endif %}
+
+    <!--Paginación de los productos-->
+    {% if productos.has_other_pages %}
+        <ul class="pagination center">
+            {% if productos.has_previous %}
+                <li class="waves-effect"><a href="?page={{ productos.previous_page_number }}">
+                    <i class="material-icons">chevron_left</i></a>
+                </li>
+            {% endif %}
+
+            {% for i in productos.paginator.page_range %}
+                {% if productos.number == i %}
+                    <li class="active waves-effect"><a href="{{ i }}"><span>{{ i }}</span></a></li>
+                {% else %}
+                    <li class="waves-effect"><a href="?page={{ i }}">{{ i }}</a></li>
+                {% endif %}
+            {% endfor %}
+
+            {% if productos.has_next %}
+                <li class="waves-effect"><a href="?page={{ productos.next_page_number }}">
+                    <i class="material-icons">chevron_right</i></a>
+                </li>
+            {% endif %}
+        </ul>
+    {% endif %}
+
+</div>
+
+<script>
+    $(document).ready(function(){
+        $('.materialboxed').materialbox();
+    });
+</script>
+
+{% endblock %}

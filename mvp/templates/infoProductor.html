@@ -1,0 +1,292 @@
+{% extends "comunes/base.html" %}
+
+{% block title %}Más info{% endblock %}
+
+{% block content %}
+
+<div class="container"><br><br>
+
+    <!--Foto, datos y direccion del productor-->
+    <div class="row" style="align:center;">
+
+        {% if productor.fotoLogo %}
+        <div class="col s3"><br><br>
+            <img class="circle responsive-img materialboxed" src="{{ productor.fotoLogo.url }}"
+                style="width: 170px; height: 150px;">
+        </div>
+        {% else %}
+        <div class="col s3"><br><br>
+            <img class="circle responsive-img" src="static/img/imagen-no-disponible.png"
+                style="width: 170px; height: 150px;">
+        </div>
+        {% endif %}
+
+        <div class="col s6 card-panel hoverable grey lighten-5 z-depth-1">
+            <div class="row">
+                <div style="text-align: center;">
+                    <h3><strong>{{ productor.nombreEmpresa }}</strong></h3><br>
+                </div>
+
+                <div style="padding-left: 10px; padding-right: 10px;">
+                    <strong>Nombre:</strong> {{ productor.nombre }} {{ productor.apellidos }}
+                </div>
+
+                <div style="padding-left: 10px; padding-right: 10px;">
+                    <strong>Dirección email:</strong> {{ productor.email }}
+                </div>
+
+                <div style="padding-left: 10px; padding-right: 10px;">
+                    <strong>Teléfono:</strong> {{ productor.telefono }}
+                </div>
+
+                <div style="padding-left: 10px; padding-right: 10px;">
+                    <strong>Descripción:</strong> {{ productor.descripcion }}
+                </div>
+            </div><!--row-->
+        </div>
+
+        {% if geolocalizacion %}
+            {% for geo in geolocalizacion %}
+            <div class="col s3">
+                <div id="map" class="map map-home" style="margin:12px 0 12px 0;height:200px;"></div>
+
+                <script>
+                    var latitud = "{{ geo.latitud }}";
+                    var longitud = "{{ geo.longitud }}";
+                    var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        osmAttrib = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                        osm = L.tileLayer(osmUrl, {maxZoom: 14, attribution: osmAttrib});
+                    var map = L.map('map').setView([latitud, longitud], 17).addLayer(osm);
+                    L.marker([latitud, longitud])
+                        .addTo(map)
+                        .openPopup();
+                </script>
+
+                <div class="center"><strong>Dónde encontrarnos</strong></div>
+            </div>
+            {% endfor %}
+        {% else %}
+        <br><br><br>
+        <div class="center"><strong>Este productor no tiene registrado una dirección para la
+            recogida de sus productos.</strong>
+        </div>
+        {% endif %}
+    </div><!--row-->
+
+    <!--Recogida, reparto y cobro-->
+    <div class="row">
+        <!--Recogida-->
+        <div class="col s4 card-panel hoverable grey lighten-5 z-depth-1" style="text-align:center;">
+            <h6><strong>TIPO DE RECOGIDA</strong></h6><br>
+            {% if not recogidaProductor %}
+                <div><strong>Este productor no tiene registrado en el sistema una
+                    forma de recogida de sus productos.</strong></div><br>
+            {% else %}
+                {% for recogida in recogidaProductor %}
+                    <div>La información para la recogida es: </div><br>
+                    <div><strong>Dirección: </strong>{{ recogida.direccion }}</div><br>
+                    <div><strong>Horario: </strong>{{ recogida.diasYHoras }}</div><br>
+                {% endfor %}
+            {% endif %}
+        </div><!--col-->
+
+        <!--Reparto-->
+        <div class="col s4 card-panel hoverable grey lighten-5 z-depth-1" style="text-align:center;">
+            <h6><strong>TIPO DE REPARTO</strong></h6><br>
+            {% if not repartoProductor %}
+                <div><strong>Este productor no tiene registrado en el sistema una
+                    forma de reparto a domicilio de sus productos.</strong></div><br>
+            {% else %}
+                {% for reparto in repartoProductor %}
+                    <div>El horario del reparto a domicilio es:</div><br>
+                    <div><strong>{{ reparto.diasYHoras }}</strong></div><br>
+                {% endfor %}
+            {% endif %}
+        </div><!--col-->
+
+        <!--Cobro-->
+        <div class="col s4 card-panel hoverable grey lighten-5 z-depth-1" style="text-align:center;">
+            <h6><strong>FORMA DE COBRO</strong></h6><br>
+            {% if not cobroProductor %}
+                <div>Este productor <strong>no tiene registrado</strong> en el sistema una
+                    forma de cobro de sus productos.</div><br>
+            {% else %}
+                {% for cobro in cobroProductor %}
+                    <div>Los tipos de cobro que permite este productor son los siguientes: </div>
+                    <div><strong>{{ cobro.tipoCobro }}</strong></div><br>
+                {% endfor %}
+            {% endif %}
+        </div><!--col-->
+    </div><!--row-->
+
+    <!--Boton ver sus productos y para enviarle un mensaje privado-->
+    <div class="row">
+        <div class="col s12">
+            <a button class="btn waves-effect waves-light left" href= "{% url 'verProductos' productor.id %}"
+                type="submit" name="action">Ver productos</a>
+            {% if user.consumidor %}
+            <a button class="btn waves-effect waves-light right" href= "{% url 'enviarMensaje' productor.id %}"
+                type="submit" name="action">Enviar mensaje</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row"><div class="col s12 card"></div></div>
+
+    <!--Lista de todas las reseñas del productor-->
+    <div class="row" style="text-align:center;">
+        <div class="row">
+            <div class="col s3">
+                <div><h4><strong>RESEÑAS</strong></h4></div>
+            </div>
+        </div>
+        {% if not reseniasProductor %}
+        <div class="col s6">
+            <div><strong>El productor no tienen ninguna reseña disponible.</strong></div>
+        </div>
+        {% else %}
+            {% for resenia in reseniasProductor %}
+                <div class="col s12">
+                    <div class="card-panel hoverable grey lighten-5 z-depth-1">
+
+                        <div class="row valign-wrapper left-align">
+                            <div class="col s5">
+                                <row><strong>Usuario:</strong> {{ resenia.consumidor }}</row>
+                            </div>
+
+                            <div class="col s4">
+                                <row><strong>Fecha:</strong> {{ resenia.fechaHora }}</row>
+                            </div>
+
+                            <div class="col s3">
+                                {% if resenia.calificacion == '1' %}
+                                    <row>
+                                        <strong>Calificación: </strong>
+                                        <i class="tiny material-icons">star</i>
+                                        <i class="tiny material-icons">star_border</i>
+                                        <i class="tiny material-icons">star_border</i>
+                                        <i class="tiny material-icons">star_border</i>
+                                        <i class="tiny material-icons">star_border</i>
+                                    </row>
+                                {% elif resenia.calificacion == '2' %}
+                                    <row>
+                                        <strong>Calificación: </strong>
+                                        <i class="tiny material-icons">star</i>
+                                        <i class="tiny material-icons">star</i>
+                                        <i class="tiny material-icons">star_border</i>
+                                        <i class="tiny material-icons">star_border</i>
+                                        <i class="tiny material-icons">star_border</i>
+                                    </row>
+                                {% elif resenia.calificacion == '3' %}
+                                    <row>
+                                        <strong>Calificación: </strong>
+                                        <i class="tiny material-icons">star</i>
+                                        <i class="tiny material-icons">star</i>
+                                        <i class="tiny material-icons">star</i>
+                                        <i class="tiny material-icons">star_border</i>
+                                        <i class="tiny material-icons">star_border</i>
+                                    </row>
+                                {% elif resenia.calificacion == '4' %}
+                                    <row>
+                                        <strong>Calificación: </strong>
+                                        <i class="tiny material-icons">star</i>
+                                        <i class="tiny material-icons">star</i>
+                                        <i class="tiny material-icons">star</i>
+                                        <i class="tiny material-icons">star</i>
+                                        <i class="tiny material-icons">star_border</i>
+                                    </row>
+                                {% elif resenia.calificacion == '5' %}
+                                    <row>
+                                        <strong>Calificación: </strong>
+                                        <i class="tiny material-icons">star</i>
+                                        <i class="tiny material-icons">star</i>
+                                        <i class="tiny material-icons">star</i>
+                                        <i class="tiny material-icons">star</i>
+                                        <i class="tiny material-icons">star</i>
+                                    </row>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row valign-wrapper left-align">
+                            <div class="col s12"><br>
+                                <row><strong>Comentario: </strong> {{ resenia.comentario }}</row>
+                            </div>
+                        </div>
+
+                    </div><!--card-->
+                </div><!--col-->
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!--Formulario para agregar una reseña (sólo consumidores)-->
+    {% if user.consumidor %}
+    <div class="row"><div class="col s12 card"></div></div>
+    <div class="row">
+        <div class="col s12">
+            <div class="right"><strong>Agregue una reseña si lo desea pulsando </strong>
+            <a class="modal-trigger" href="#reseña">AQUÍ</a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Modal Structure -->
+    <div id="reseña" class="modal bottom-sheet">
+        <div class="modal-content">
+            <h4>Escriba una opinión sobre: <strong>{{ productor.nombreEmpresa }}</strong></h4><br>
+
+            <form method="post" action="{% url 'infoProductor' productor.id %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row">
+                <div class="input-field col s1">
+                    <i class="material-icons prefix">star</i>
+                    {{ resProductor_form.calificacion }}
+                    <label for="{{ resProductor_form.calificacion.id_for_label }}">Calificación</label>
+                    <font color="red"><p class="errores">{{ resProductor_form.calificacion.errors }}</p></font>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="input-field col s6">
+                    <i class="material-icons prefix">add_comment</i>
+                    <textarea name="comentario" id="textarea2" class="materialize-textarea" data-length="200"></textarea>
+                    <label for="{{ resProductor_form.comentario.id_for_label }}">Comentario</label>
+                    <font color="red"><p class="errores">{{ resProductor_form.comentario.errors }}</p></font>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn waves-effect waves-light left" type="submit" name="action">Añadir reseña</button>
+        </div>
+    </div>
+
+</div><br><!--container-->
+
+<script>
+    $(document).ready(function(){
+        $('select').formSelect();
+    })
+</script>
+
+<script>
+    $(document).ready(function(){
+        $('.materialboxed').materialbox();
+    });
+</script>
+
+<script>
+    $(document).ready(function() {
+        $('input#input_text, textarea#textarea2').characterCounter();
+    });
+</script>
+
+<script>
+    $(document).ready(function(){
+        $('.modal').modal();
+    });
+</script>
+
+{% endblock %}
