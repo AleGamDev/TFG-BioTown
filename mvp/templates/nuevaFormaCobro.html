@@ -17,10 +17,13 @@
 
                     <div class="row">
                         <div class="input-field col s12">
-                            <i class="material-icons prefix">local_atm</i>
-                            <textarea name="tipoCobro" id="textarea2" class="materialize-textarea" data-length="200"></textarea>
-                            <label for="{{ nuevaFormaCobro_form.tipoCobro.id_for_label }}">Forma de cobro:</label>
-                            <span class="helper-text left-align">Por ejemplo: Efectivo y Tarjeta de crédito</span>
+                            <select multiple name="tipoCobro">
+                                <option value = "" disabled>Puede elegir hasta 3 formas de cobro</option>
+                                <option value = "Efectivo">Efectivo</option>
+                                <option value = "Tarjeta de credito">Tarjeta de crédito</option>
+                                <option value = "Contra reembolso">Contra reembolso</option>
+                            </select>
+                            <label for="{{ nuevaFormaCobro_form.tipoCobro.id_for_label }}">Forma de cobro</label>
                             <font color="red"><p class="errores">{{ nuevaFormaCobro_form.tipoCobro.errors }}</p></font>
                         </div>
                     </div>
@@ -46,6 +49,12 @@
 <script>
     $(document).ready(function() {
         $('input#input_text, textarea#textarea2').characterCounter();
+    });
+</script>
+
+<script>
+    $(document).ready(function(){
+        $('select').formSelect().isMultiple();
     });
 </script>
 

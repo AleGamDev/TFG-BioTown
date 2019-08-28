@@ -70,11 +70,6 @@ class GeolocalizacionForm(forms.ModelForm):
         model = models.Geolocalizacion
         fields = ('latitud', 'longitud')
 
-class TipoRepartoForm(forms.ModelForm):
-    class Meta:
-        model = models.TipoReparto
-        fields = ('diasYHoras',)
-
 class FormaCobroForm(forms.ModelForm):
     class Meta:
         model = models.FormaCobro

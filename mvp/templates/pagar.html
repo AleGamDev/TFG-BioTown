@@ -1,0 +1,23 @@
+{% extends "comunes/base.html" %}
+
+{% block title %}Pedido completado{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+    <!--Título-->
+    <div class="col s12">
+        <h3 class="center-align"><strong>¡Pedido realizado con éxito!</strong></h3>
+    </div>
+    <br>
+
+    <div class="col s12">
+        <p class="center-align"><strong>Gracias por confiar en nosotros.</strong></p>
+        <br>
+        <p class="center-align">Compruebe el pedido <strong>{{ pedido.numeroPedido }}</strong> en su <a href= "{% url 'perfil' %}">perfil.</a></p>
+    </div>
+
+</div>
+
+{% endblock %}

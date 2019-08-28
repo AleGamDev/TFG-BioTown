@@ -1,0 +1,151 @@
+{% extends "comunes/base.html" %}
+
+{% block title %}Ver pedido{% endblock %}
+
+{% block content %}
+
+{% if user.consumidor %}
+<div class="container">
+
+    <!--Título-->
+    <div class="col s12">
+        <h3 class="center-align"><strong>Detalles del pedido</strong></h3>
+    </div>
+    <br>
+
+    <!--Info del pedido-->
+    <div id="basic-tabs" class="card card card-default scrollspy">
+        <div class="card-content pt-5 pr-5 pb-5 pl-5">
+            <div id="invoice">
+
+                <!--Header del pedido-->
+                <div class="invoice-header">
+                    <div class="row section">
+                        <div class="col s12 m12 l12">
+                            <h4 class="center-align mb-5"><strong>INFORMACIÓN DE PEDIDO</strong></h4>
+                        </div>
+                    </div>
+
+                    <div class="row section">
+                        <div class="col s12 m12 l12">
+                            <div class="col s6 m6 l6 left-align">
+                                <span><strong>Número de pedido:</strong> {{ pedido.numeroPedido }}</span>
+                            </div>
+                            <div class="col s6 m6 l6 right-align">
+                                <span><strong>Fecha:</strong> {{ pedido.fechaHora }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Tabla con los productos del pedido-->
+                <div class="invoice-table">
+                    <div class="row">
+                        <div class="col s12 m12 l12">
+                        <table class="highlight responsive-table">
+                            <thead>
+                                <tr>
+                                    <th>Nº:</th>
+                                    <th>Producto</th>
+                                    <th>Precio por unidad</th>
+                                    <th>Cantidad</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                            {% if carrito %}
+                                {% for item in items %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ item.producto.nombre }}</td>
+                                    <td>{{ item.producto.precioUnidad }} {{ item.producto.unidadMedida }}</td>
+                                    <td>{{ item.cantidad }}</td>
+                                    <td>{{ item.precioTotal }} Euros.</td>
+                                </tr>
+                                {% endfor %}
+                            {% endif %}
+                            <tr>
+                                <td colspan="3"></td>
+                                <td>Tasas</td>
+                                <td style="text-transform: uppercase;"><strong>I.V.A. Incluido</strong></td>
+                            </tr>
+                            <tr>
+                                <td colspan="3"></td>
+                                <td class="cyan white-text pl-1" style="text-transform: uppercase;"><strong>Total a pagar</strong></td>
+                                <td class="cyan white-text"><strong>{{ carrito.total }} Euros.</strong></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Footer del pedido-->
+                <br>
+                <div class="invoice-footer mt-6">
+                    <div class="row">
+                        <div class="col s12 m6 l6">
+                            <h6 class="mb-2 mt-3"><strong>PRODUCTORES DEL PEDIDO</strong></h6>
+                        </div>
+                    </div>
+
+                    <div class="invoice-productores-table">
+                        <div class="row">
+                            <div class="col s12 m12 l12">
+                            <table class="highlight responsive-table centered">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Teléfono</th>
+                                        <th>Email</th>
+                                        <th>Productor</th>
+                                        <th>Enviar mensaje</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                {% if productores %}
+                                    {% for p in productores %}
+                                    <tr>
+                                        <td><a href="{% url 'infoProductor' p.productor.id %}">{{ p.productor.nombreEmpresa }}</a></td>
+                                        <td>{{ p.productor.telefono }}</td>
+                                        <td>{{ p.productor.email }}</td>
+                                        <td>{{ p.productor.nombre }} {{ p.productor.apellidos }}</td>
+                                        <td><a href="{% url 'enviarMensaje' p.productor.id %}"><i class="material-icons prefix">message</i></a></td>
+                                    </tr>
+                                    {% endfor %}
+                                {% endif %}
+                                </tbody>
+                            </table>
+                            </div>
+                        </div>
+                    </div><br>
+
+                    <div class="row">
+                        <div class="col s12 m12 l12 right-align">
+                            <h6 class="mb-2 mt-3"><strong>ESTADO DEL PEDIDO:</strong> {{ pedido.estado }}</h6>
+                        </div>
+                    </div>
+                </div>
+                <br>
+
+            </div>
+        </div>
+    </div>
+
+    <!--Botón para volver al perfil-->
+    <br>
+    <div class="row">
+        <div class="col s12">
+            <div class="center-align">
+                <a button class="btn waves-effect waves-light" href= "{% url 'perfil' %}"
+                    type="submit" name="action">Atras</a>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endif %}
+
+{% endblock %}

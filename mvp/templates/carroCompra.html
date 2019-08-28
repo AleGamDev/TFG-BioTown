@@ -15,14 +15,14 @@
     <!--Tabla con los productos del carro-->
     <div class="container center-align" style="justify-content: center;">
         <div class="col s12">
-            {% if carrito %}
-            <table class="striped centered">
+            {% if carrito and request.session.total_items %}
+            <table class="highlight centered">
                 <thead>
                     <tr>
                         <th>Foto</th>
                         <th>Nombre</th>
                         <th>Precio unitario</th>
-                        <th>Cantidad</th>
+                        <th>Cantidad actual</th>
                         <th></th>
                         <th></th>
                     </tr>
@@ -31,12 +31,12 @@
                     {% for item in carrito.itemcarrito_set.all %}
                     <tr>
                         <td><img class="materialboxed center-block" src="{{ item.producto.foto.url }}" style="height:80px;"></td>
-                        <td><a href="{% url 'infoProducto' item.id %}"> {{ item.producto.nombre }} </a></td>
+                        <td><a href="{% url 'infoProducto' item.producto.id %}"> {{ item.producto.nombre }} </a></td>
                         <td> {{ item.producto.precioUnidad }} {{ item.producto.unidadMedida }} </td>
-                        <td> {{ item.cantidad }} </td>
+                        <td><strong> {{ item.cantidad }} </strong></td>
                         <td style="width: 10%;">
-                            <form class="form" method='GET' action={% url 'actualizaCarro' item.producto.id %}>
-                                <input class="center" name='cant' type='number' value='{{ item.cantidad }}'/>
+                            <form class="form" method='GET' action="{% url 'actualizaCarro' item.producto.id %}">
+                                <input class="center" name='cant' type='number' value='{{ item.cantidad }}' min="1"/>
                                 <button style="background-color: #26a69a;" class="btn-floating btn-small waves-effect waves-light"
                                     type="submit"><i class="material-icons">add</i></button>
                             </form>
@@ -53,14 +53,16 @@
                 </div>
             </div>
             <br>
-            <div class="row">
-                <div class="col s12 push-s5">
-                    <a button class="btn waves-effect waves-light" href= "{% url 'index' %}"
-                        type="submit" name="action">Comprar</a>
+                {% if request.session.total_items > 0 %}
+                <div class="row">
+                    <div class="col s12 push-s5">
+                        <a button class="btn waves-effect waves-light" href= "{% url 'infoPedido' %}"
+                            type="submit" name="action">Comprar</a>
+                    </div>
                 </div>
-            </div>
+                {% endif %}
             {% else %}
-                <p>Su carrito esta vacío.</p>
+                <p>Su carrito está actualmente vacío.</p>
                 <br>
             {% endif %}
         </div>
@@ -73,7 +75,7 @@
     <div id="borraProducto/{{ item.producto.id }}" class="modal">
         <div class="modal-content">
             <h4>ADVERTENCIA</h4>
-                <p>¿Está seguro que desea eliminar el producto <strong>{{ item.producto.nombre }}</strong> de su carro de compra?</p>
+                <p>¿Está seguro que desea eliminar el producto <strong>"{{ item.producto.nombre }}"</strong> de su carro de compra?</p>
         </div>
         <div class="modal-footer">
             <a href='{% url 'actualizaCarro' item.producto.id %}?cant=0' class="modal-close waves-effect waves-green btn-flat"><strong>Sí, eliminar producto</strong></a>

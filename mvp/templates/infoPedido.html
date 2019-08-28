@@ -1,0 +1,151 @@
+{% extends "comunes/base.html" %}
+
+{% block title %}Realizar pago{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+    <!--Título-->
+    <div class="col s12">
+        <h3 class="center-align"><strong>Realización de pedido</strong></h3>
+    </div>
+    <br>
+
+    <!--Factura del pedido-->
+    <div id="basic-tabs" class="card card card-default scrollspy">
+        <div class="card-content pt-5 pr-5 pb-5 pl-5">
+            <div id="invoice">
+
+                <!--Header del pedido-->
+                <div class="invoice-header">
+                    <div class="row section">
+                        <div class="col s12 m6 l6">
+                            <p><strong>BioTown</strong></p>
+                            <p>600 600 600 <i class="material-icons tiny">call</i></p>
+                        </div>
+                        <div class="col s12 m6 l6">
+                            <h4 class="right-align mb-5"><strong>INFORMACIÓN DE PAGO</strong></h4>
+                        </div>
+                    </div>
+
+                    <div class="row section">
+                        <div class="col s12 m6 l6">
+                            <h6 class="mb-2 mt-3"><strong>CLIENTE</strong></h6>
+                            <p style="text-transform: uppercase;">{{ consumidor.nombre }} {{ consumidor.apellidos }}</p>
+                            <p style="text-transform: uppercase;">{{ consumidor.email }}</p>
+                        </div>
+
+                        <div class="col s12 m6 l6">
+                            <div class="invoce-no right-align">
+                                <p><span style="text-transform: uppercase;"><strong>Número de pedido:</strong></span> {{ pedido.numeroPedido }}</p>
+                            </div>
+                            <div class="invoce-no right-align">
+                                <p><span style="text-transform: uppercase;"><strong>Fecha:</strong></span> {{ pedido.fechaHora }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Tabla con los productos del pedido-->
+                <div class="invoice-table">
+                    <div class="row">
+                        <div class="col s12 m12 l12">
+                        <table class="highlight responsive-table">
+                            <thead>
+                                <tr>
+                                    <th>Nº:</th>
+                                    <th>Producto</th>
+                                    <th>Precio por unidad</th>
+                                    <th>Cantidad</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                            {% if carrito %}
+                                {% for item in items %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ item.producto.nombre }}</td>
+                                    <td>{{ item.producto.precioUnidad }} {{ item.producto.unidadMedida }}</td>
+                                    <td>{{ item.cantidad }}</td>
+                                    <td>{{ item.precioTotal }} Euros.</td>
+                                </tr>
+                                {% endfor %}
+                            {% endif %}
+                            <tr>
+                                <td colspan="3"></td>
+                                <td>Tasas</td>
+                                <td style="text-transform: uppercase;"><strong>I.V.A. Incluido</strong></td>
+                            </tr>
+                            <tr>
+                                <td colspan="3"></td>
+                                <td class="cyan white-text pl-1" style="text-transform: uppercase;"><strong>Total a pagar</strong></td>
+                                <td class="cyan white-text"><strong>{{ carrito.total }} Euros.</strong></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Footer del pedido-->
+                <br>
+                <div class="invoice-footer mt-6">
+                    <div class="row">
+                        <div class="col s12 m6 l6">
+                            <h6 class="mb-2 mt-3"><strong>PRODUCTORES DEL PEDIDO</strong></h6>
+                        </div>
+                    </div>
+
+                    <div class="invoice-productores-table">
+                        <div class="row">
+                            <div class="col s12 m12 l12">
+                            <table class="highlight responsive-table centered">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Teléfono</th>
+                                        <th>Email</th>
+                                        <th>Productor</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                {% if productores %}
+                                    {% for productor in productores %}
+                                    <tr>
+                                        <td>{{ productor.nombreEmpresa }}</td>
+                                        <td>{{ productor.telefono }}</td>
+                                        <td>{{ productor.email }}</td>
+                                        <td>{{ productor.nombre }} {{ productor.apellidos }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                {% endif %}
+                                </tbody>
+                            </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+
+            </div>
+        </div>
+    </div>
+
+    <!--Botón para proceder con el pago-->
+    <br>
+    <div class="row">
+        <div class="col s12">
+            <div class="right-align">
+                <a button class="btn waves-effect waves-light" href= "{% url 'pagar' pedido.id %}"
+                    type="submit" name="action">Continuar</a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

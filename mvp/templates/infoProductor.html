@@ -21,99 +21,73 @@
         </div>
         {% endif %}
 
-        <div class="col s6 card-panel hoverable grey lighten-5 z-depth-1">
+        <div class="col s9 card-panel hoverable grey lighten-5 z-depth-1">
             <div class="row">
                 <div style="text-align: center;">
-                    <h3><strong>{{ productor.nombreEmpresa }}</strong></h3><br>
+                    <h3><strong>{{ productor.nombreEmpresa }}</strong></h3>
                 </div>
 
-                <div style="padding-left: 10px; padding-right: 10px;">
+                <div style="padding-left: 20px; padding-right: 20px;">
                     <strong>Nombre:</strong> {{ productor.nombre }} {{ productor.apellidos }}
                 </div>
 
-                <div style="padding-left: 10px; padding-right: 10px;">
-                    <strong>Dirección email:</strong> {{ productor.email }}
+                <div style="padding-left: 20px; padding-right: 20px;">
+                    <strong>Email:</strong> {{ productor.email }}
                 </div>
 
-                <div style="padding-left: 10px; padding-right: 10px;">
+                <div style="padding-left: 20px; padding-right: 20px;">
                     <strong>Teléfono:</strong> {{ productor.telefono }}
                 </div>
 
-                <div style="padding-left: 10px; padding-right: 10px;">
+                <div style="padding-left: 20px; padding-right: 20px;">
                     <strong>Descripción:</strong> {{ productor.descripcion }}
                 </div>
             </div><!--row-->
         </div>
 
-        {% if geolocalizacion %}
-            {% for geo in geolocalizacion %}
-            <div class="col s3">
-                <div id="map" class="map map-home" style="margin:12px 0 12px 0;height:200px;"></div>
-
-                <script>
-                    var latitud = "{{ geo.latitud }}";
-                    var longitud = "{{ geo.longitud }}";
-                    var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                        osmAttrib = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-                        osm = L.tileLayer(osmUrl, {maxZoom: 14, attribution: osmAttrib});
-                    var map = L.map('map').setView([latitud, longitud], 17).addLayer(osm);
-                    L.marker([latitud, longitud])
-                        .addTo(map)
-                        .openPopup();
-                </script>
-
-                <div class="center"><strong>Dónde encontrarnos</strong></div>
-            </div>
-            {% endfor %}
-        {% else %}
-        <br><br><br>
-        <div class="center"><strong>Este productor no tiene registrado una dirección para la
-            recogida de sus productos.</strong>
-        </div>
-        {% endif %}
     </div><!--row-->
 
-    <!--Recogida, reparto y cobro-->
+    <!--Recogida-->
     <div class="row">
-        <!--Recogida-->
-        <div class="col s4 card-panel hoverable grey lighten-5 z-depth-1" style="text-align:center;">
-            <h6><strong>TIPO DE RECOGIDA</strong></h6><br>
+        <!--Direccion y horario-->
+        <div class="col s12" style="display: inline-block;">
             {% if not recogidaProductor %}
-                <div><strong>Este productor no tiene registrado en el sistema una
-                    forma de recogida de sus productos.</strong></div><br>
+            <div class="card-panel hoverable grey lighten-5 z-depth-1" style="text-align:center;">
+                <h5><strong>TIPO DE RECOGIDA</strong></h5><br>
+                    <div><strong>Este productor no tiene registrado en el sistema una
+                        forma de recogida de sus productos.</strong></div><br>
+            </div>
             {% else %}
+                {% if geolocalizacion %}
+                    {% for geo in geolocalizacion %}
+                    <div class="col s5">
+                        <div id="map" class="map map-home" style="margin:12px 0 12px 0;height:200px;"></div>
+
+                        <script>
+                            var latitud = "{{ geo.latitud }}";
+                            var longitud = "{{ geo.longitud }}";
+                            var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                osm = L.tileLayer(osmUrl, {maxZoom: 17});
+                            var map = L.map('map').setView([latitud, longitud], 14).addLayer(osm);
+                            L.marker([latitud, longitud])
+                                .addTo(map)
+                                .openPopup();
+                        </script>
+
+                        <div class="center"><strong>
+                            <a href="https://www.openstreetmap.org/?mlat={{ geo.latitud }}&mlon={{ geo.longitud }}#map=16/{{ geo.latitud }}/{{ geo.longitud }}"
+                                target="_blank">Dónde encontrarnos</a></strong>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+
                 {% for recogida in recogidaProductor %}
-                    <div>La información para la recogida es: </div><br>
-                    <div><strong>Dirección: </strong>{{ recogida.direccion }}</div><br>
-                    <div><strong>Horario: </strong>{{ recogida.diasYHoras }}</div><br>
-                {% endfor %}
-            {% endif %}
-        </div><!--col-->
-
-        <!--Reparto-->
-        <div class="col s4 card-panel hoverable grey lighten-5 z-depth-1" style="text-align:center;">
-            <h6><strong>TIPO DE REPARTO</strong></h6><br>
-            {% if not repartoProductor %}
-                <div><strong>Este productor no tiene registrado en el sistema una
-                    forma de reparto a domicilio de sus productos.</strong></div><br>
-            {% else %}
-                {% for reparto in repartoProductor %}
-                    <div>El horario del reparto a domicilio es:</div><br>
-                    <div><strong>{{ reparto.diasYHoras }}</strong></div><br>
-                {% endfor %}
-            {% endif %}
-        </div><!--col-->
-
-        <!--Cobro-->
-        <div class="col s4 card-panel hoverable grey lighten-5 z-depth-1" style="text-align:center;">
-            <h6><strong>FORMA DE COBRO</strong></h6><br>
-            {% if not cobroProductor %}
-                <div>Este productor <strong>no tiene registrado</strong> en el sistema una
-                    forma de cobro de sus productos.</div><br>
-            {% else %}
-                {% for cobro in cobroProductor %}
-                    <div>Los tipos de cobro que permite este productor son los siguientes: </div>
-                    <div><strong>{{ cobro.tipoCobro }}</strong></div><br>
+                    <div class="col s7 card-panel hoverable grey lighten-5 z-depth-1">
+                        <h5 style="text-align:center;"><strong>TIPO DE RECOGIDA</strong></h5><br>
+                            <div><strong>Dirección: </strong>{{ recogida.direccion }}</div><br>
+                            <div><strong>Horario: </strong>{{ recogida.diasYHoras }}</div><br>
+                    </div><!--col-->
                 {% endfor %}
             {% endif %}
         </div><!--col-->
@@ -131,7 +105,7 @@
         </div>
     </div>
 
-    <div class="row"><div class="col s12 card"></div></div>
+    <hr>
 
     <!--Lista de todas las reseñas del productor-->
     <div class="row" style="text-align:center;">
@@ -222,7 +196,7 @@
 
     <!--Formulario para agregar una reseña (sólo consumidores)-->
     {% if user.consumidor %}
-    <div class="row"><div class="col s12 card"></div></div>
+    <hr>
     <div class="row">
         <div class="col s12">
             <div class="right"><strong>Agregue una reseña si lo desea pulsando </strong>

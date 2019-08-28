@@ -27,13 +27,17 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# Configuracion de paypal
+PAYPAL_MODE= "sandbox" # sandbox o live
+PAYPAL_CLIENT_ID  = "Ac91rYJwtFlWuIsx-s1SXgvxkOkIxp-Agr_1JZmlIJJo4ZUHJzQbcl_dc5eSwTO47cmIMSDQSElFVx3s",
+PAYPAL_CLIENT_SECRET = "EB7vCNaExvGmawzqMnPqTT6VOpvCIh_aNT4umN9oGx1RpinMg4WRa3rZfPZuqX7VPGLAShsSYUIBzDCV"
 
 # Application definition
-
 INSTALLED_APPS = [
     'mvp.apps.MvpConfig',
     'materializecssform',
     'leaflet',
+    'multiselectfield',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

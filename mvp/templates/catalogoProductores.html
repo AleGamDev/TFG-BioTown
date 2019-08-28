@@ -48,7 +48,26 @@
                 </div>
 
                 <div class="col s2">
-                    Aquí va el mapa con la direccion.
+                {% if geolocalizaciones %}
+                    {% for geo in geolocalizaciones %}
+                        {% if geo.productor_id == productor.id %}
+                        <div id="map" class="map map-home" style="height:140px;"></div>
+                            <script>
+                                var latitud = "{{ geo.latitud }}";
+                                var longitud = "{{ geo.longitud }}";
+                                var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                    osm = L.tileLayer(osmUrl, {maxZoom: 14});
+                                var map = L.map('map').setView([latitud, longitud], 17).addLayer(osm);
+                                L.marker([latitud, longitud])
+                                    .addTo(map)
+                                    .openPopup();
+                            </script>
+                        {% else %}
+                        <br>
+                        <div class="center"><strong>No tiene registrado una dirección para la recogida de sus productos.</strong></div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
                 </div>
 
                 <div class="col s2"><br>

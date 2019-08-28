@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
+from multiselectfield import MultiSelectField
 from datetime import datetime, timedelta
 from django.db import models
 
@@ -152,25 +153,6 @@ class Mensajeria(models.Model):
     def __str__(self):
         return '%s %s %s' % (self.titulo, self.emisor, self.receptor)
 
-class Carrito(models.Model):
-    total = models.DecimalField('Total', validators=[MinValueValidator(0.00)], max_digits=8, decimal_places=2, default=0.00) # 999,999.99
-    def __unicode__(self):
-        return "Carrito total: %s" % (self.total)
-
-class ItemCarrito(models.Model):
-    cantidad = models.IntegerField('Cantidad', default=1)
-    precioTotal = models.DecimalField('PrecioTotal', validators=[MinValueValidator(0.00)], max_digits=8, decimal_places=2, default=0.00) # 999,999.99
-    carrito = models.ForeignKey(Carrito, null=True, blank=True, on_delete=models.CASCADE)
-    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
-
-class TipoReparto(models.Model):
-    diasYHoras = models.TextField('Días y horas de reparto',
-        help_text='Escriba los días y horas de reparto. Por ejemplo: L --> 10:30 a 14:30, M --> 9:00 a 17:30', max_length=500)
-    productor = models.ForeignKey(
-        Productor, on_delete=models.CASCADE, related_name="tipoReparto")
-    def __str__(self):
-        return '%s %s' % (self.diasYHoras, self.productor)
-
 class TipoRecogida(models.Model):
     direccion = models.TextField('Dirección', max_length=100)
     diasYHoras = models.TextField('Días y horas de recogida',
@@ -189,45 +171,55 @@ class Geolocalizacion(models.Model):
         return '%s %s %s' % (self.latitud, self.longitud, self.productor)
 
 class FormaCobro(models.Model):
-    tipoCobro = models.TextField('Tipo de cobro', max_length=200)
+    opcionesTipoCobro = (
+        ('Efectivo', 'Efectivo'),
+        ('Tarjeta de credito', 'Tarjeta de crédito'),
+        ('Contra reembolso', 'Contra reembolso'),
+    )
+    tipoCobro = MultiSelectField(choices=opcionesTipoCobro, max_choices=3, max_length=60)
     productor = models.ForeignKey(
         Productor, on_delete=models.CASCADE, related_name="formaCobro")
     def __str__(self):
         return '%s %s' % (self.tipoCobro, self.productor)
 
-class DireccionEnvio(models.Model):
-    direccion = models.CharField('Dirección', max_length=150, help_text='Incluya dirección completa')
-    localidad = models.CharField('Localidad', max_length=50)
-    provincia = models.CharField('Provincia', max_length=25)
-    codPostal = models.CharField('Código postal', max_length=5)
-    consumidor = models.ForeignKey(
-        Consumidor, on_delete=models.CASCADE, related_name="direccionEnvio")
-    def __str__(self):
-        return '%s %s %s' % (self.direccion, self.codPostal, self.consumidor)
+class Carrito(models.Model):
+    total = models.DecimalField('Total', validators=[MinValueValidator(0.00)], max_digits=8, decimal_places=2, default=0.00) # 999,999.99
+    def __unicode__(self):
+        return "Carrito total: %s" % (self.total)
 
-class LineaEnvio(models.Model):
-    opcionesEstadoEnvio = (
-        ('Enviado', 'Enviado'),
-        ('EnProceso', 'En proceso'),
-        ('Cancelado', 'Cancelado'),
-    )
-    estadoEnvio = models.CharField('Estado de envío', max_length=10, choices=opcionesEstadoEnvio, blank=True, null=True)
-    tipoReparto = models.ForeignKey(
-        TipoReparto, on_delete=models.CASCADE, related_name="lineaEnvio")
-    tipoRecogida = models.ForeignKey(
-        TipoRecogida, on_delete=models.CASCADE, related_name="lineaEnvio")
-    formaCobro = models.ForeignKey(
-        FormaCobro, on_delete=models.CASCADE, related_name="lineaEnvio")
-    direccionEnvio = models.ForeignKey(
-        DireccionEnvio, on_delete=models.CASCADE, related_name="lineaEnvio")
-    def __str__(self):
-        return '%s %s %s' % (self.lineaProducto, self.formaCobro, self.estadoEnvio)
+class ItemCarrito(models.Model):
+    cantidad = models.IntegerField('Cantidad', default=1)
+    precioTotal = models.DecimalField('PrecioTotal', validators=[MinValueValidator(0.00)], max_digits=8, decimal_places=2, default=0.00) # 999,999.99
+    carrito = models.ForeignKey(Carrito, null=True, blank=True, on_delete=models.CASCADE)
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
+    productor = models.ForeignKey(Productor, null=True, blank=True, on_delete=models.CASCADE)
 
 class Pedido(models.Model):
-    telefono = models.CharField('Teléfono', max_length=9)
+    opcionesEstadoPedido = (
+        ('EnProceso', 'En proceso'),
+        ('Realizado', 'Realizado'),
+        ('Cancelado', 'Cancelado'),
+    )
+    numeroPedido = models.CharField(max_length=25, unique=True)
+    consumidor = models.ForeignKey(
+        Consumidor, on_delete=models.CASCADE, related_name="pedidosConsumidor", null=True, blank=True)
+    carrito = models.ForeignKey(
+        Carrito, on_delete=models.CASCADE, related_name="carritoPedido")
+    estado = models.CharField('Estado del pedido', max_length=20, choices=opcionesEstadoPedido, default='EnProceso')
     fechaHora = models.DateTimeField('Fecha y hora', auto_now_add = True)
-    detallesPedido = models.TextField('Detalles del pedido',
-        help_text='Escriba cualquier aclaración si lo desea', max_length=500, null=True)
-    lineaEnvio = models.OneToOneField(LineaEnvio, on_delete=models.CASCADE)
-    def __str__(self):
-        return '%s %s %s' % (self.lineaEnvio, self.fechaHora, self.detallesPedido)
+
+class PedidoAProductor(models.Model):
+    productor = models.ForeignKey(
+        Productor, on_delete=models.CASCADE, null=True, blank=True)
+    pedido = models.ForeignKey(
+        Pedido, on_delete=models.CASCADE, null=True, blank=True)
+    fechaHora = models.DateTimeField('Fecha y hora', auto_now_add = True)
+    visto = models.BooleanField('Visto', default=False)
+    total = models.DecimalField('Total', validators=[MinValueValidator(0.00)], max_digits=8, decimal_places=2, default=0.00) # 999,999.99
+
+class Pago(models.Model):
+    precioTotal = models.DecimalField('Total', validators=[MinValueValidator(0.00)], max_digits=8, decimal_places=2, default=0.00) # 999,999.99
+    paypalId = models.CharField(max_length=100, null=True)
+    fechaHora = models.DateTimeField('Fecha y hora', auto_now_add = True)
+    consumidor = models.ForeignKey(Consumidor, on_delete=models.CASCADE, null=True, blank=True)
+    pedido = models.OneToOneField(Pedido, on_delete=models.CASCADE)

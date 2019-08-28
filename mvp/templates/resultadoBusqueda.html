@@ -57,8 +57,9 @@
                             </row>
                             {% if user.consumidor %}
                                 <br><br>
-                                <row><a button class="btn red lighten-1 waves-effect waves-light" href="{% url 'index' %}" type="submit"
-                                name="action">Comprar</a>
+                                <row><a button class="btn red lighten-1 waves-effect waves-light"
+                                    href="{% url 'actualizaCarro' producto.id %}?cant=1" type="submit"
+                                    name="action">Comprar</a>
                             </row>
                             {% endif %}
                         </div>

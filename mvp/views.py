@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect
+from django.views.generic.base import RedirectView
 from django.contrib import messages
+from django.urls import reverse
 from django.db.models import Q
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout
@@ -13,10 +15,13 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from datetime import datetime
 from . import models
 from . import forms
+from django.conf import settings
+from .utils import generador_numPedido
+import paypalrestsdk
 
 # Función vista para la página de inicio:
 def index(request):
-    noticiasBlog = models.Blog.objects.all().order_by('fechaHora')[:4]
+    noticiasBlog = models.Blog.objects.all().order_by('-fechaHora')[:4]
     context = {'noticiasBlog':noticiasBlog}
     return render(request, 'index.html', context)
 
@@ -141,10 +146,9 @@ def editarProductor(request):
 
 def infoProductor(request, productor_id):
     productor = get_object_or_404(models.Productor, pk=productor_id)
-    # El servicio de recogida, geolocalizacion, reparto, cobro y reseñas del productor
+    # El servicio de recogida, geolocalizacion, cobro y reseñas del productor
     recogidaProductor = models.TipoRecogida.objects.filter(productor_id=productor_id)
     geolocalizacion = models.Geolocalizacion.objects.filter(productor_id=productor_id)
-    repartoProductor = models.TipoReparto.objects.filter(productor_id=productor_id)
     cobroProductor = models.FormaCobro.objects.filter(productor_id=productor_id)
     reseniasProductor = models.ReseñaProductor.objects.filter(productor_id=productor_id).order_by('fechaHora')[:9]
     # El POST para agregar las reseñas, solo para CONSUMIDORES:
@@ -160,9 +164,8 @@ def infoProductor(request, productor_id):
     else:
         form = forms.ReseñaProductorForm()
     context = {'productor': productor, 'recogidaProductor': recogidaProductor,
-        'geolocalizacion': geolocalizacion, 'repartoProductor': repartoProductor,
-        'cobroProductor': cobroProductor, 'reseniasProductor': reseniasProductor,
-        'resProductor_form': form}
+        'geolocalizacion': geolocalizacion,'cobroProductor': cobroProductor,
+        'reseniasProductor': reseniasProductor, 'resProductor_form': form}
     return render(request, './infoProductor.html', context)
 
 def verProductos(request, productor_id):
@@ -239,6 +242,36 @@ def infoProducto(request, producto_id):
     return render(request, './infoProducto.html', context)
 
 @login_required
+def verPedido(request, pedido_id):
+    pedido = models.Pedido.objects.get(id=pedido_id, consumidor_id=request.user.id)
+    carritoId = pedido.carrito_id
+    carrito = models.Carrito.objects.get(id=carritoId)
+    items = models.ItemCarrito.objects.filter(carrito_id=carritoId)
+    productores = models.PedidoAProductor.objects.filter(pedido_id=pedido.id)
+    context = {'pedido':pedido, 'carrito':carrito, 'items':items, 'productores':productores}
+    return render(request, './verPedido.html', context)
+
+@login_required
+def verPedidoProductor(request, pedido_id):
+    pedidoProductor = models.PedidoAProductor.objects.get(pedido_id=pedido_id, productor_id=request.user.id)
+    pedidoId = pedidoProductor.pedido_id
+    pedido = models.Pedido.objects.get(id=pedidoId)
+    carritoId = pedido.carrito_id
+    carrito = models.Carrito.objects.get(id=carritoId)
+    items = models.ItemCarrito.objects.filter(carrito_id=carritoId, productor_id=request.user.id)
+
+    request.session['contar_pedidos'] = models.PedidoAProductor.objects.filter(
+        Q(productor_id=request.user.id) & Q(visto=False)).count()
+    contarPed = request.session['contar_pedidos']
+    if (pedidoProductor.visto == False and pedidoProductor.productor_id == request.user.id):
+        contarPed = contarPed - 1
+        pedidoProductor.visto = True
+        pedidoProductor.save()
+
+    context = {'pedidoProductor':pedidoProductor, 'pedido':pedido, 'carrito':carrito, 'items':items}
+    return render(request, './verPedidoProductor.html', context)
+
+@login_required
 def añadirRecogida(request):
     productor = models.Productor.objects.get(id=request.user.id)
     if request.method == "POST":
@@ -276,36 +309,6 @@ def editarRecogida(request):
     return render(request, './editarRecogida.html', context)
 
 @login_required
-def añadirReparto(request):
-    productor = models.Productor.objects.get(id=request.user.id)
-    if request.method == "POST":
-        form = forms.TipoRepartoForm(request.POST)
-        if form.is_valid():
-            reparto = form.save(commit=False)
-            reparto.productor = productor
-            reparto.save()
-            return redirect('perfil')
-    else:
-        form = forms.TipoRepartoForm()
-    return render(request, './nuevoReparto.html', {'nuevoReparto_form': form})
-
-@login_required
-def editarReparto(request):
-    reparto = models.TipoReparto.objects.get(productor=request.user)
-    if request.method == 'POST':
-        form = forms.TipoRepartoForm(request.POST, instance=reparto)
-        if form.is_valid():
-            reparto = form.save(commit=False)
-            reparto.save()
-            return redirect('perfil')
-        else:
-            context = {'editarReparto_form': form}
-            return render(request, './editarReparto.html', context)
-    else:
-        form = forms.TipoRepartoForm(instance=reparto)
-    return render(request, './editarReparto.html', {'editarReparto_form': form})
-
-@login_required
 def añadirFormaCobro(request):
     productor = models.Productor.objects.get(id=request.user.id)
     if request.method == "POST":
@@ -314,6 +317,7 @@ def añadirFormaCobro(request):
             cobro = form.save(commit=False)
             cobro.productor = productor
             cobro.save()
+            print(cobro.tipoCobro)
             return redirect('perfil')
     else:
         form = forms.FormaCobroForm()
@@ -329,11 +333,11 @@ def editarFormaCobro(request):
             formaCobro.save()
             return redirect('perfil')
         else:
-            context = {'editarFormaCobro_form': form}
+            context = {'editarFormaCobro_form': form, 'formaCobro': formaCobro}
             return render(request, './editarFormaCobro.html', context)
     else:
         form = forms.FormaCobroForm(instance=formaCobro)
-    return render(request, './editarFormaCobro.html', {'editarFormaCobro_form': form})
+    return render(request, './editarFormaCobro.html', {'editarFormaCobro_form': form, 'formaCobro': formaCobro})
 
 @login_required
 def añadirBlog(request):
@@ -424,41 +428,20 @@ def enviarMensaje(request, usuario_id):
 @login_required
 def verMensaje(request, mensaje_id):
     mensaje = get_object_or_404(models.Mensajeria, pk=mensaje_id)
-    mensaje.leido = True
-    mensaje.save()
+    request.session['contar_mensajes'] = models.Mensajeria.objects.filter(
+        Q(receptor_id=request.user.id) & Q(leido=False)).count()
+    contar = request.session['contar_mensajes']
+    if (mensaje.leido == False and mensaje.receptor_id == request.user.id):
+        contar = contar - 1
+        mensaje.leido = True
+        mensaje.save()
     context = {'mensaje':mensaje}
     return render(request, 'verMensaje.html', context)
 
-@login_required
-def perfil(request):
-    # Los productos del productor logueado
-    mis_productos = models.Producto.objects.filter(productor_id=request.user.id).order_by('nombre')
-    # El servicio de recogida del productor logueado
-    recogida_user = models.TipoRecogida.objects.filter(productor_id=request.user.id)
-    # El servicio de reparto del productor logueado
-    reparto_user = models.TipoReparto.objects.filter(productor_id=request.user.id)
-    # El modo de cobro del productor logueado
-    tipoCobro = models.FormaCobro.objects.filter(productor_id=request.user.id)
-    # El blog del admin logueado
-    mis_blogs = models.Blog.objects.filter(administrador_id=request.user.id).order_by('fechaHora')
-    # Todos los usuarios del sistema, para el admin
-    los_usuarios = models.User.objects.all()
-    # Los mensajes de los usuarios
-    mis_mensajes = models.Mensajeria.objects.filter(
-        Q(emisor_id=request.user.id) | Q(receptor_id=request.user.id)).order_by('fechaHora')
-    # Para mostrar el numero de mensajes nuevos sin ver
-    nuevos = 0
-    for mensaje in mis_mensajes:
-        if mensaje.leido is False:
-            nuevos = nuevos + 1
-    context = {'mis_productos':mis_productos,'recogida_user':recogida_user,
-    'reparto_user':reparto_user, 'tipoCobro':tipoCobro, 'mis_blogs':mis_blogs,
-    'los_usuarios':los_usuarios, 'mis_mensajes':mis_mensajes, 'nuevos':nuevos}
-    return render(request, './perfil.html', context)
-
 def catalogoProductores(request):
     total_productores = models.Productor.objects.all().count()
-    prods = models.Productor.objects.all()
+    geolocalizaciones = models.Geolocalizacion.objects.all()
+    prods = models.Productor.objects.all().order_by('nombreEmpresa')
 
     page = request.GET.get('page', 1)
     paginator = Paginator(prods, 5) # Muestra 5 productores por pagina
@@ -469,11 +452,11 @@ def catalogoProductores(request):
     except EmptyPage:
         productores = paginator.page(paginator.num_pages)
 
-    context = {'productores': productores, 'total_productores': total_productores}
+    context = {'productores': productores, 'total_productores': total_productores, 'geolocalizaciones': geolocalizaciones}
     return render(request, './catalogoProductores.html', context)
 
 def catalogoProductos(request, tipo):
-    prods = models.Producto.objects.filter(tipo=tipo)
+    prods = models.Producto.objects.filter(tipo=tipo).order_by('nombre')
     total_productos = len(prods)
 
     page = request.GET.get('page', 1)
@@ -490,16 +473,17 @@ def catalogoProductos(request, tipo):
 
 @login_required
 def carroCompra(request):
+    consumidor = models.Consumidor.objects.get(id=request.user.id)
     try:
         carritoId = request.session['carrito_id']
+        carrito = models.Carrito.objects.get(id=carritoId)
     except:
         carritoId = None
 
     if carritoId:
-        carrito = models.Carrito.objects.get(id=carritoId)
-        context = {'carrito': carrito}
+        context = {'consumidor':consumidor, 'carrito': carrito}
     else:
-        context = {'empty': True}
+        context = {'consumidor':consumidor, 'empty': True}
     return render(request, './carroCompra.html', context)
 
 @login_required
@@ -522,7 +506,8 @@ def actualizaCarro(request, producto_id):
 
     carrito = models.Carrito.objects.get(id=carritoId)
     producto = get_object_or_404(models.Producto, pk=producto_id)
-    item_carrito, created = models.ItemCarrito.objects.get_or_create(carrito=carrito, producto=producto)
+    productor = models.Productor.objects.get(id=producto.productor_id)
+    item_carrito, created = models.ItemCarrito.objects.get_or_create(carrito=carrito, producto=producto, productor=productor)
     if created:
         print ("Yeah")
 
@@ -534,8 +519,6 @@ def actualizaCarro(request, producto_id):
             item_carrito.save()
     else:
         pass
-    #if not item_carrito in carrito.items.all():
-    #    carrito.items.add(item_carrito)
 
     nuevo_total = 0.00
     for item in carrito.itemcarrito_set.all():
@@ -546,7 +529,121 @@ def actualizaCarro(request, producto_id):
     carrito.total = nuevo_total
     carrito.save()
 
+    productos = models.ItemCarrito.objects.filter(carrito_id=carritoId)
+    for prod in productos:
+        precio = float(prod.producto.precioUnidad) * prod.cantidad
+        prod.precioTotal = precio
+        if int(prod.cantidad) == 0:
+            prod.delete()
+        prod.save()
+
     return redirect('carroCompra')
+
+@login_required
+def infoPedido(request):
+    consumidor = models.Consumidor.objects.get(id=request.user.id)
+    try:
+        carritoId = request.session['carrito_id']
+        carrito = models.Carrito.objects.get(id=carritoId)
+    except:
+        carritoId = None
+        return redirect('carroCompra')
+
+    items = models.ItemCarrito.objects.filter(carrito_id=carritoId)
+    productores = []
+    # Productor de cada producto del carrito
+    for item in items:
+        productorId = item.productor_id
+        productor = models.Productor.objects.get(id=productorId)
+        if productores.count(productor) > 0:
+            pass
+        else:
+            productores.append(productor)
+
+    try:
+        nuevo_pedido = models.Pedido.objects.get(carrito=carrito)
+    except models.Pedido.DoesNotExist:
+        nuevo_pedido = models.Pedido()
+        nuevo_pedido.carrito = carrito
+        nuevo_pedido.consumidor = consumidor
+        nuevo_pedido.numeroPedido = generador_numPedido()
+        # El nuevo_pedido.estado se autoañade a: "EnProceso"
+        nuevo_pedido.save()
+    except:
+        return redirect('carroCompra')
+
+    context = {'consumidor':consumidor, 'carrito':carrito, 'pedido':nuevo_pedido,
+        'items':items, 'productores':productores}
+
+    return render(request, 'infoPedido.html', context)
+
+@login_required
+def pagar(request, pedido_id):
+    pedido = models.Pedido.objects.get(id=pedido_id)
+    carritoId = request.session['carrito_id']
+    items = models.ItemCarrito.objects.filter(carrito_id=carritoId)
+
+    productores = []
+    # Productor de cada producto del carrito
+    for item in items:
+        productorId = item.productor_id
+        productor = models.Productor.objects.get(id=productorId)
+        if productores.count(productor) > 0:
+            pass
+        else:
+            productores.append(productor)
+
+    for productor in productores:
+        p = productor.id
+        pedidoAProductor = models.PedidoAProductor()
+        pedidoAProductor.productor = productor
+        pedidoAProductor.pedido = pedido
+        gananciaProductor = 0.00
+        for item in items:
+            if (item.productor_id == p):
+                gananciaProductor += float(item.precioTotal)
+        pedidoAProductor.total = gananciaProductor
+        pedidoAProductor.save()
+
+    if pedido.estado == 'EnProceso':
+        pedido.estado = 'Realizado'
+        pedido.save()
+        del request.session['carrito_id']
+        del request.session['total_items']
+
+    context = {'pedido': pedido}
+
+    return render(request, 'pagar.html', context)
+
+@login_required
+def perfil(request):
+    # Los productos del productor logueado
+    mis_productos = models.Producto.objects.filter(productor_id=request.user.id).order_by('nombre')
+    # El servicio de recogida del productor logueado
+    recogida_user = models.TipoRecogida.objects.filter(productor_id=request.user.id)
+    geolocalizacion = models.Geolocalizacion.objects.filter(productor_id=request.user.id)
+    # El blog del admin logueado
+    mis_blogs = models.Blog.objects.filter(administrador_id=request.user.id).order_by('-fechaHora')
+    # Todos los usuarios del sistema, para el admin
+    los_usuarios = models.User.objects.all()
+    # Los mensajes de los usuarios
+    mis_mensajes = models.Mensajeria.objects.filter(
+        Q(emisor_id=request.user.id) | Q(receptor_id=request.user.id)).order_by('-fechaHora')
+    # La sesion de los mensajes sin leer de los usuarios
+    request.session['contar_mensajes'] = models.Mensajeria.objects.filter(
+        Q(receptor_id=request.user.id) & Q(leido=False)).count()
+    # Pedidos de los consumidores
+    mis_pedidos = models.Pedido.objects.filter(consumidor_id=request.user.id).order_by('-fechaHora')
+    # Los pedidos del productor
+    pedidosProductor = models.PedidoAProductor.objects.filter(productor_id=request.user.id).order_by('-fechaHora')
+    # La sesion de los pedidos sin ver de los productores
+    request.session['contar_pedidos'] = models.PedidoAProductor.objects.filter(
+        Q(productor_id=request.user.id) & Q(visto=False)).count()
+
+    context = {'mis_productos':mis_productos, 'recogida_user':recogida_user, 'geolocalizacion':geolocalizacion,
+    'mis_blogs':mis_blogs, 'los_usuarios':los_usuarios, 'mis_mensajes':mis_mensajes, 'mis_pedidos':mis_pedidos,
+    'pedidosProductor':pedidosProductor}
+    return render(request, './perfil.html', context)
 
 def terminosYCondiciones(request):
     return render(request, './TyC.html')
