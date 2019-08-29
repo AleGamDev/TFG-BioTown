@@ -16,8 +16,8 @@ from datetime import datetime
 from . import models
 from . import forms
 from django.conf import settings
-from .utils import generador_numPedido
-import paypalrestsdk
+from .utils import generador_numPedido, pagarProductores
+from django.views.decorators.csrf import csrf_exempt
 
 # Función vista para la página de inicio:
 def index(request):
@@ -578,7 +578,10 @@ def infoPedido(request):
     return render(request, 'infoPedido.html', context)
 
 @login_required
+@csrf_exempt
 def pagar(request, pedido_id):
+    print(request.body)
+
     pedido = models.Pedido.objects.get(id=pedido_id)
     carritoId = request.session['carrito_id']
     items = models.ItemCarrito.objects.filter(carrito_id=carritoId)
@@ -593,6 +596,8 @@ def pagar(request, pedido_id):
         else:
             productores.append(productor)
 
+    datosProductores = {}
+
     for productor in productores:
         p = productor.id
         pedidoAProductor = models.PedidoAProductor()
@@ -603,16 +608,24 @@ def pagar(request, pedido_id):
             if (item.productor_id == p):
                 gananciaProductor += float(item.precioTotal)
         pedidoAProductor.total = gananciaProductor
+        datosProductores[productor.email] = gananciaProductor
         pedidoAProductor.save()
 
     if pedido.estado == 'EnProceso':
         pedido.estado = 'Realizado'
         pedido.save()
-        del request.session['carrito_id']
-        del request.session['total_items']
+
+    pagarProductores(datosProductores, pedido.numeroPedido)
+
+    return HttpResponse('OK')
+
+def pagarConfirmado(request, pedido_id):
+    pedido = models.Pedido.objects.get(id=pedido_id)
+
+    del request.session['carrito_id']
+    del request.session['total_items']
 
     context = {'pedido': pedido}
-
     return render(request, 'pagar.html', context)
 
 @login_required

@@ -45,10 +45,6 @@
         }
     </style>
 
-    <script
-        src="https://www.paypal.com/sdk/js?client-id=Ac91rYJwtFlWuIsx-s1SXgvxkOkIxp-Agr_1JZmlIJJo4ZUHJzQbcl_dc5eSwTO47cmIMSDQSElFVx3s">
-    </script>
-
     {% block topHeader %}
     {% include "comunes/topHeader.html" %}
     {% endblock %}
@@ -64,13 +60,14 @@
     {% block content %}
     {% endblock %}
 
+
     {% block footer %}
+    <div class="bottomFooter" style="flex:1;"></div>
     {% include "comunes/footer.html" %}
     {% endblock %}
 
     {% block js %}
         <script type="text/javascript" src={% static "js/materialize.js" %}></script>
-        <script src="https://www.paypal.com/sdk/js?client-id=sb&currency=EUR"></script>
     {% endblock %}
 
 </body>

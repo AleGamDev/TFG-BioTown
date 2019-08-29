@@ -223,7 +223,7 @@
     <div class="container center-align" style="justify-content: center;">
         <div class="row">
 
-            {% if productor.fotoLogo %}
+            {% if user.productor.fotoLogo %}
             <div class="col s3 push-s1">
                 <div class="card">
                     <div class="card-image" >
@@ -440,45 +440,16 @@
 <div id="cobro" class="col s12"><br>
     <div class="row">
         <div class="col s6 push-s3">
-            {% if not tipoCobro %}
-                <div class="card center">
-                    <div><h4 style="text-align: center;"><strong><br>FORMA DE COBRO</strong></h4></div>
-                    <div><p style="text-align: left; padding: 20px; text-align: justify;"><strong>No tiene registrada</strong> en su
-                    cuenta una forma de cobro con la cual sus clientes puedan tener información acerca del pago aceptado en sus productos.<br>
-                    Si desea añadir esta información, pulse en el botón que se muestra abajo para añadirla.<br>
-                    Tras agregarlo, se mostrará en la información de su catálogo, para el uso de los clientes del sistema.</p>
-                    </div>
-                    <div class="container center-align">
-                        <div class="row">
-                            <a button class="btn waves-effect waves-light center" href= "{% url 'nuevaFormaCobro' %}"
-                                type="submit" name="action">Añadir forma de cobro</a>
-                        </div>
-                    </div>
-                    <br>
+            <div class="card center">
+                <div><h4 style="text-align: center;"><strong><br>FORMA DE COBRO CON PAYPAL</strong></h4></div>
+                <div><p style="text-align: left; padding: 20px; text-align: justify;">Actualmente, la forma de cobro utilizada en esta plataforma es la
+                suministrada por <strong>PayPal</strong>.<br>
+                PayPal es un sistema de pagos en línea que soporta transferencias de dinero entre usuarios, sirviendo como alternativa electrónica a los
+                métodos de pago convencionales.<br><br>
+                Para crear o acceder a su cuenta pulse <a href="https://www.paypal.com/es/home" target="_blank">aquí</a></p>
                 </div>
-            {% else %}
-                {% for cobro in tipoCobro %}
-                <div class="card">
-                    <div><h4 style="text-align: center;"><strong><br>FORMA DE COBRO ACTUAL</strong></h4></div><br>
-
-                    <div class="row" style="text-align: left; padding-left: 20px;">
-                        <div class="col"><i class="material-icons prefix">local_atm</i><strong></div>
-                        <div class="col">Forma/s de cobro registrada/s:</strong></div>
-                        <div class="row">
-                            <div class="col">{{ cobro.tipoCobro }}</div>
-                        </div>
-                    </div>
-
-                    <div class="container center-align">
-                        <div class="row">
-                            <a button class="btn waves-effect waves-light center" href= "{% url 'editarFormaCobro' %}"
-                                type="submit" name="action">Modificar forma de cobro</a>
-                        </div>
-                    </div>
-                    <br>
-                </div>
-                {% endfor %}
-            {% endif %}
+                <br>
+            </div>
         </div>
     </div>
 </div>

@@ -139,13 +139,60 @@
     <br>
     <div class="row">
         <div class="col s12">
-            <div class="right-align">
-                <a button class="btn waves-effect waves-light" href= "{% url 'pagar' pedido.id %}"
-                    type="submit" name="action">Continuar</a>
+            <div class="right-align" style="width: 200px; display:block; margin:0 auto;">
+                <div id="paypal-button-container"></div>
             </div>
         </div>
     </div>
 
 </div>
+
+<script
+    src="https://www.paypal.com/sdk/js?client-id=Ac91rYJwtFlWuIsx-s1SXgvxkOkIxp-Agr_1JZmlIJJo4ZUHJzQbcl_dc5eSwTO47cmIMSDQSElFVx3s&currency=EUR">
+</script>
+
+<script>
+    paypal.Buttons({
+        createOrder: function(data, actions) {
+            return actions.order.create({
+                purchase_units: [{
+                    amount: {
+                        'value': '{{ carrito.total }}',
+                        'currency': 'EUR'
+                    }
+                }]
+            });
+        },
+        onApprove: function(data, actions) {
+            return actions.order.capture().then(function(details) {
+                alert('Transaction completed by ' + details.payer.name.given_name);
+                // Call your server to save the transaction
+                return fetch('/pagar/{{ pedido.id }}/', {
+                    method: 'post',
+                    headers: {
+                        'content-type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        orderID: data.orderID
+                    })
+                })
+                .then(function(data) {
+                    if (data.status == 200) {
+                        $(location).attr('href','/pagarConfirmado/{{ pedido.id }}/');
+                    } else {
+                        alert('Error en el pago')
+                    }
+                });
+            });
+        },
+        style: {
+            size:   'medium',
+            color:  'blue',
+            shape:  'pill',
+            label:  'pay',
+            height: 40
+        }
+    }).render('#paypal-button-container');
+</script>
 
 {% endblock %}

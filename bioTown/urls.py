@@ -59,6 +59,7 @@ urlpatterns = [
     path('verPedido/<pedido_id>/', views.verPedido, name='verPedido'),
     path('verPedidoProductor/<pedido_id>/', views.verPedidoProductor, name='verPedidoProductor'),
     path('pagar/<pedido_id>/', views.pagar, name='pagar'),
+    path('pagarConfirmado/<pedido_id>/', views.pagarConfirmado, name='pagarConfirmado'),
     path('perfil', views.perfil, name='perfil'),
     path('TyC', views.terminosYCondiciones, name='terminosYCondiciones'),
     path('PdP', views.politicasDePrivacidad, name='politicasDePrivacidad'),
