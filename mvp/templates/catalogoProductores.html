@@ -20,19 +20,19 @@
     </div>
 {% endif %}
 
-{% if not productores %}
+{% if not prods %}
     <div class="col s12">
         <h6 class="center-align">Aún no hay ningún productor registrado en el sistema</h6><br>
     </div>
 {% else %}
-    {% for productor in productores %}
+    {% for prod in prods %}
     <div class="col s8">
         <div class="card-panel hoverable grey lighten-5 z-depth-1">
             <div class="row valign-wrapper center-align">
 
-                {% if productor.fotoLogo %}
+                {% if prod.fotoLogo %}
                 <div class="col s2">
-                    <img class="circle responsive-img materialboxed" src="{{ productor.fotoLogo.url }}"
+                    <img class="circle responsive-img materialboxed" src="{{ prod.fotoLogo.url }}"
                         style="width: 100px; height: 100px; background-repeat: no-repeat; background-size: cover;">
                 </div>
                 {% else %}
@@ -44,34 +44,31 @@
 
                 <div class="col s2">
                     <row><h6><strong>NOMBRE</strong></h6></row><br>
-                    <row>{{ productor.nombreEmpresa }}</row>
+                    <row>{{ prod.nombreEmpresa }}</row>
                 </div>
 
-                <div class="col s2">
                 {% if geolocalizaciones %}
                     {% for geo in geolocalizaciones %}
-                        {% if geo.productor_id == productor.id %}
-                        <div id="map" class="map map-home" style="height:140px;"></div>
-                            <script>
-                                var latitud = "{{ geo.latitud }}";
-                                var longitud = "{{ geo.longitud }}";
-                                var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                                    osm = L.tileLayer(osmUrl, {maxZoom: 14});
-                                var map = L.map('map').setView([latitud, longitud], 17).addLayer(osm);
-                                L.marker([latitud, longitud])
-                                    .addTo(map)
-                                    .openPopup();
-                            </script>
-                        {% else %}
-                        <br>
-                        <div class="center"><strong>No tiene registrado una dirección para la recogida de sus productos.</strong></div>
+                        {% if prod.id == geo.productor_id %}
+                            <div class="col s2">
+                                <div id="{{prod.id}}" class="map map-home" style="height:140px;"></div>
+                                <script>
+                                    var latitud = "{{ geo.latitud }}";
+                                    var longitud = "{{ geo.longitud }}";
+                                    var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                        osm = L.tileLayer(osmUrl, {maxZoom: 14});
+                                    var map = L.map('{{ prod.id }}').setView([latitud, longitud], 17).addLayer(osm);
+                                    L.marker([latitud, longitud])
+                                        .addTo(map)
+                                        .openPopup();
+                                </script>
+                            </div>
                         {% endif %}
                     {% endfor %}
                 {% endif %}
-                </div>
 
                 <div class="col s2"><br>
-                    <a button class="btn waves-effect waves-light" href="{% url 'infoProductor' productor.id %}" type="submit"
+                    <a button class="btn waves-effect waves-light" href="{% url 'infoProductor' prod.id %}" type="submit"
                         name="action">Más info</a>
                 </div>
 

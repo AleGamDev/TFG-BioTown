@@ -440,9 +440,14 @@ def verMensaje(request, mensaje_id):
 
 def catalogoProductores(request):
     total_productores = models.Productor.objects.all().count()
-    geolocalizaciones = models.Geolocalizacion.objects.all()
     prods = models.Productor.objects.all().order_by('nombreEmpresa')
 
+    geolocalizaciones = []
+    for prod in prods:
+        geo = models.Geolocalizacion.objects.get(productor_id=prod.id)
+        geolocalizaciones.append(geo)
+
+    print(geolocalizaciones)
     page = request.GET.get('page', 1)
     paginator = Paginator(prods, 5) # Muestra 5 productores por pagina
     try:
@@ -452,7 +457,7 @@ def catalogoProductores(request):
     except EmptyPage:
         productores = paginator.page(paginator.num_pages)
 
-    context = {'productores': productores, 'total_productores': total_productores, 'geolocalizaciones': geolocalizaciones}
+    context = {'prods':prods, 'productores': productores, 'total_productores': total_productores, 'geolocalizaciones': geolocalizaciones}
     return render(request, './catalogoProductores.html', context)
 
 def catalogoProductos(request, tipo):
@@ -580,8 +585,6 @@ def infoPedido(request):
 @login_required
 @csrf_exempt
 def pagar(request, pedido_id):
-    print(request.body)
-
     pedido = models.Pedido.objects.get(id=pedido_id)
     carritoId = request.session['carrito_id']
     items = models.ItemCarrito.objects.filter(carrito_id=carritoId)
